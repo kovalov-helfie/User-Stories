@@ -27,6 +27,14 @@ export class UserService {
         return await this.userRepository.findByPk(userAddress.toLowerCase())
     }
 
+    async isUserVerified({userAddress}:FindUserParams) {
+        const user = await this.userRepository.findByPk(userAddress.toLowerCase())
+        if(user) {
+            return user.isVerified
+        }
+        return false
+    }
+
     async createUser({userAddress}:CreateUserParams) {
         return await this.userRepository.create({userAddress: userAddress.toLowerCase(), isVerified: false})
     }

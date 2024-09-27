@@ -48,6 +48,14 @@ export class ClaimService {
         return await this.claimRepository.findByPk(compositeKey(userAddress, claimTopic))
     }
 
+    async isClaimVerified({userAddress, claimTopic}:FindClaimById) {
+        const claim = await this.claimRepository.findByPk(compositeKey(userAddress, claimTopic))
+        if(claim) {
+            return claim.isClaimVerified
+        }
+        return false
+    }
+
     async createClaim({userAddress, claimTopic, docGen}:CreateClaimParams) {
         return await this.claimRepository.create({
             claimUserKey: compositeKey(userAddress, claimTopic),

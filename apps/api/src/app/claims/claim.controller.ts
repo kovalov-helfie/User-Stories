@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Patch, Post, UnauthorizedException } from "@nestjs/common";
 import { ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
 import { ClaimService } from "./claim.service";
 import { Claim } from "./claim.entity";
@@ -7,11 +7,16 @@ import { ClaimUserDto } from "./dto/claim-user.dto";
 import { CreateClaimDto } from "./dto/create-claim.dto";
 import { UpdateDocgenDto } from "./dto/update-docgen.dto";
 import { VerifyClaimDto } from "./dto/verify-claim.dto";
+import { SignatureService } from "../signatures/signature.service";
+import { UserService } from "../users/user.service";
 
 @ApiTags('Claims')
 @Controller('/claims')
 export class ClaimController {
-    constructor(private readonly claimService: ClaimService) {
+    constructor(
+        private readonly claimService: ClaimService, 
+        private readonly userService: UserService, 
+        private readonly signatureService: SignatureService) {
     }
 
     @Get('/')
@@ -38,21 +43,44 @@ export class ClaimController {
     @Post('/add-claim')
     @ApiResponse({status: 201, description: 'add user claim', type: Claim})
     @ApiOperation({summary: "add user claim"})
-    createClaim(@Body() dto: CreateClaimDto) {
+    async createClaim(@Body() dto: CreateClaimDto) {
+        if(!(await this.signatureService.verifySignature('createClaim', dto.signature, dto.userAddress))) {
+            throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
+        } else if(!(await this.userService.findUser({userAddress: dto.userAddress}))) {
+            throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
+        } else if(await this.claimService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic})) {
+            throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] already exists`)
+        }
         return this.claimService.createClaim({userAddress: dto.userAddress, claimTopic: dto.claimTopic, docGen: dto.docgen});
     }
 
     @Patch('/update-docgen')
     @ApiResponse({status: 200, description: 'update user docgen on specific claim', type: Claim})
     @ApiOperation({summary: "update docgen by claimId"})
-    updateDocgen(@Body() dto: UpdateDocgenDto) {
+    async updateDocgen(@Body() dto: UpdateDocgenDto) {
+        if(!(await this.signatureService.verifySignature('updateDocgen', dto.signature, dto.userAddress))) {
+            throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
+        } else if(!(await this.userService.findUser({userAddress: dto.userAddress}))) {
+            throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
+        } else if(!(await this.claimService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic}))) {
+            throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] does not exist`)
+        }
         return this.claimService.updateDocgen({userAddress: dto.userAddress, claimTopic: dto.claimTopic, docGen: dto.docgen});
     }
 
-    @Patch('/verify-user')
+    @Patch('/verify-user-claim')
     @ApiResponse({status: 200, description: 'verify user claim', type: Claim})
     @ApiOperation({summary: "verify user claim"})
-    verifyClaim(@Body() dto: VerifyClaimDto) {
+    async verifyClaim(@Body() dto: VerifyClaimDto) {
+        if(!(await this.signatureService.verifySignature('verifyClaim', dto.signature, dto.userAddress))) {
+            throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
+        } else if(!(await this.userService.findUser({userAddress: dto.userAddress}))) {
+            throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
+        } else if(!(await this.claimService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic}))) {
+            throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] does not exist`)
+        } else if((await this.claimService.isClaimVerified({userAddress: dto.userAddress, claimTopic: dto.claimTopic}))) {
+            throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] is already verified`)
+        }
         return this.claimService.verifyClaim({userAddress: dto.userAddress, claimTopic: dto.claimTopic});
     }
 }
