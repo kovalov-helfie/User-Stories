@@ -46,8 +46,10 @@ export class UserController {
     @ApiResponse({status: 200, description: 'set user identity', type: User})
     @ApiOperation({summary: "set user identity"})
     async setIdentity(@Body() dto: SetIdentityDto) {
-        if(!(await this.signatureService.verifySignature('setIdentity', dto.signature, dto.userAddress))) {
-            throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
+        if(!(await this.signatureService.verifySignature('setIdentity', dto.signature, dto.senderAddress))) {
+            throw new UnauthorizedException(`User [${dto.senderAddress}] not authorized`)
+        } else if(!(await this.userClaimService.isUserExist({userAddress: dto.senderAddress}))) {
+            throw new ForbiddenException(`Sender [${dto.senderAddress}] does not exist`)
         } else if(!(await this.userClaimService.isUserExist({userAddress: dto.userAddress}))) {
             throw new ForbiddenException(`User [${dto.userAddress}] does not exist`)
         } else if(((await this.userClaimService.findUser({userAddress: dto.userAddress})).identityAddress !== '')) {

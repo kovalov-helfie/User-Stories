@@ -5,6 +5,10 @@ export class SetIdentityDto {
     @IsString()
     @IsEthereumAddress()
     @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
+    senderAddress: string;
+    @IsString()
+    @IsEthereumAddress()
+    @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
     userAddress: string;
     @IsString()
     @IsEthereumAddress()
