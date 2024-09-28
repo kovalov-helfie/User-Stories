@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 
 import { DatabaseModule } from './database/database.module';
-import { UserModule } from './users/user.module';
-import { ClaimModule } from './claims/claim.module';
+import { UserClaimModule } from './users/user-claim.module';
 
 @Module({
-  imports: [DatabaseModule, UserModule, ClaimModule],
+  imports: [DatabaseModule, UserClaimModule],
   controllers: [],
   providers: [],
 })

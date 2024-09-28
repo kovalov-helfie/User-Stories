@@ -1,6 +1,19 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { CLAIM_REPOSITORY } from "../constants";
-import { Claim } from "./claim.entity";
+import { User } from "./user.entity";
+import { CLAIM_REPOSITORY, USER_REPOSITORY } from "../constants";
+import { Claim } from "../claims/claim.entity";
+
+interface CreateUserParams {
+    userAddress: string;
+}
+
+interface FindUserParams {
+    userAddress: string;
+}
+
+interface VerifyUserParams {
+    userAddress: string;
+}
 
 interface FindAllByUserParams {
     userAddress: string;
@@ -32,15 +45,49 @@ const compositeKey = (...keys:(string|number)[]) =>
     keys.map(el => el.toString().toLowerCase()).join('-')
 
 @Injectable()
-export class ClaimService {
-    constructor(@Inject(CLAIM_REPOSITORY) private readonly claimRepository: typeof Claim){
+export class UserClaimService {
+    constructor(@Inject(USER_REPOSITORY) private readonly userRepository: typeof User,
+        @Inject(CLAIM_REPOSITORY) private readonly claimRepository: typeof Claim) {
     }
 
-    async findAll() {
+    async findAllUsers() {
+        return await this.userRepository.findAll()
+    }
+
+    async findUser({userAddress}:FindUserParams) {
+        return await this.userRepository.findByPk(userAddress.toLowerCase())
+    }
+
+    async isUserExist({userAddress}:FindUserParams) {
+        const user = await this.userRepository.findByPk(userAddress.toLowerCase())
+        return user ? true : false
+    }
+
+    async isUserVerified({userAddress}:FindUserParams) {
+        const user = await this.userRepository.findByPk(userAddress.toLowerCase())
+        if(user) {
+            return user.isVerified
+        }
+        return false
+    }
+
+    async createUser({userAddress}:CreateUserParams) {
+        return await this.userRepository.create({userAddress: userAddress.toLowerCase(), isVerified: false})
+    }
+
+    async verifyUser({userAddress}:VerifyUserParams) {
+        const [rows, entity] = await this.userRepository.update(
+            {isVerified: true}, 
+            {where : {userAddress: userAddress.toLowerCase()}, returning: true}
+        )
+        return entity
+    }
+
+    async findAllClaims() {
         return await this.claimRepository.findAll()
     }
 
-    async findAllByUser({userAddress}:FindAllByUserParams) {
+    async findAllClaimsByUser({userAddress}:FindAllByUserParams) {
         return await this.claimRepository.findAll({where: {userAddress: userAddress.toLowerCase()}})
     }
 
