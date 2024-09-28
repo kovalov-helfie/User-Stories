@@ -11,8 +11,14 @@ interface FindUserParams {
     userAddress: string;
 }
 
+interface SetIdentityParams {
+    userAddress: string;
+    identityAddress: string;
+}
+
 interface VerifyUserParams {
     userAddress: string;
+    verify: boolean;
 }
 
 interface FindAllByUserParams {
@@ -39,6 +45,7 @@ interface UpdateDocgenParams {
 interface VerifyClaimParams {
     userAddress: string;
     claimTopic: number;
+    verify: boolean;
 }
 
 const compositeKey = (...keys:(string|number)[]) => 
@@ -71,13 +78,37 @@ export class UserClaimService {
         return false
     }
 
+    async isUserAdmin({userAddress}:FindUserParams) {
+        const user = await this.userRepository.findByPk(userAddress.toLowerCase())
+        if(user) {
+            return user.isAdmin
+        }
+        return false
+    }
+
     async createUser({userAddress}:CreateUserParams) {
         return await this.userRepository.create({userAddress: userAddress.toLowerCase(), isVerified: false})
     }
 
-    async verifyUser({userAddress}:VerifyUserParams) {
+    async setIdentity({userAddress, identityAddress}:SetIdentityParams) {
         const [rows, entity] = await this.userRepository.update(
-            {isVerified: true}, 
+            {identityAddress: identityAddress}, 
+            {where : {userAddress: userAddress.toLowerCase()}, returning: true}
+        )
+        return entity
+    }
+
+    async verifyUser({userAddress, verify}:VerifyUserParams) {
+        const [rows, entity] = await this.userRepository.update(
+            {isVerified: verify}, 
+            {where : {userAddress: userAddress.toLowerCase()}, returning: true}
+        )
+        return entity
+    }
+
+    async verifyAdmin({userAddress, verify}:VerifyUserParams) {
+        const [rows, entity] = await this.userRepository.update(
+            {isAdmin: verify}, 
             {where : {userAddress: userAddress.toLowerCase()}, returning: true}
         )
         return entity
@@ -133,9 +164,9 @@ export class UserClaimService {
         return entity;
     }
 
-    async verifyClaim({userAddress, claimTopic}:VerifyClaimParams) {
+    async verifyClaim({userAddress, claimTopic, verify}:VerifyClaimParams) {
         const [rows, entity] = await this.claimRepository.update(
-            {isClaimVerified: true}, 
+            {isClaimVerified: verify}, 
             {where : {claimUserKey: compositeKey(userAddress, claimTopic)}, returning: true})
         return entity;
     }

@@ -132,13 +132,24 @@ export class ClaimController {
     async verifyClaim(@Body() dto: VerifyClaimDto) {
         if(!(await this.signatureService.verifySignature('verifyClaim', dto.signature, dto.userAddress))) {
             throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
+        } else if(!(await this.userClaimService.isUserAdmin({userAddress: dto.senderAddress}))) {
+            throw new BadRequestException(`Sender [${dto.senderAddress}] not verified`)
         } else if(!(await this.userClaimService.isUserExist({userAddress: dto.userAddress}))) {
             throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
         } else if(!(await this.userClaimService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic}))) {
             throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] does not exist`)
-        } else if((await this.userClaimService.isClaimVerified({userAddress: dto.userAddress, claimTopic: dto.claimTopic}))) {
-            throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] is already verified`)
+        } 
+        const isClaimVerified = await this.userClaimService.isClaimVerified({userAddress: dto.userAddress, claimTopic: dto.claimTopic})
+        if(dto.verify) {
+            if(isClaimVerified) {
+                throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] is already verified`)
+            }
+        } else {
+            if(!isClaimVerified) {
+                throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] is not verified`)
+            }
         }
-        return await this.userClaimService.verifyClaim({userAddress: dto.userAddress, claimTopic: dto.claimTopic});
+
+        return await this.userClaimService.verifyClaim({userAddress: dto.userAddress, claimTopic: dto.claimTopic, verify: dto.verify});
     }
 }
