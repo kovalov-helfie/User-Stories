@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, ForbiddenException, Get, Patch, Post, UnauthorizedException } from "@nestjs/common";
+import { BadRequestException, Body, Controller, ForbiddenException, Get, Param, Patch, Post, UnauthorizedException } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { ApiTags, ApiResponse, ApiOperation } from "@nestjs/swagger";
 import { User } from "./user.entity";
@@ -18,15 +18,15 @@ export class UserController {
     @Get('/')
     @ApiResponse({status: 200, description: 'all users', type: [User]})
     @ApiOperation({summary: "retrieve all users"})
-    getUsers() {
-        return this.userService.findAll();
+    async getUsers() {
+        return await this.userService.findAll();
     }
 
-    @Get('/user')
-    @ApiResponse({status: 200, description: 'user', type: [User]})
+    @Get('/:userAddress')
+    @ApiResponse({status: 200, description: 'user', type: User})
     @ApiOperation({summary: "retrieve user by address"})
-    getUser(@Body() dto: FindUserDto) {
-        return this.userService.findUser({userAddress: dto.userAddress});
+    async getUser(@Param() dto: FindUserDto) {
+        return await this.userService.findUser({userAddress: dto.userAddress});
     }
 
     @Post('/add-user')
@@ -38,7 +38,7 @@ export class UserController {
         } else if(await this.userService.findUser({userAddress: dto.userAddress})) {
             throw new BadRequestException(`User [${dto.userAddress}] already exists`)
         }
-        return this.userService.createUser({userAddress: dto.userAddress});
+        return await this.userService.createUser({userAddress: dto.userAddress});
     }
 
     @Patch('/verify-user')
@@ -52,6 +52,6 @@ export class UserController {
         } else if(await this.userService.isUserVerified({userAddress: dto.userAddress})) {
             throw new BadRequestException(`User [${dto.senderAddress}] is already verified`)
         }
-        return this.userService.verifyUser({userAddress: dto.userAddress});
+        return await this.userService.verifyUser({userAddress: dto.userAddress});
     }
 }

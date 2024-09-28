@@ -56,10 +56,18 @@ export class ClaimService {
         return false
     }
 
+    async areAllClaimsVerified({userAddress}:FindAllByUserParams) {
+        const claims = await this.claimRepository.findAll({where: {userAddress: userAddress.toLowerCase()}})
+        if(claims.find(el => el.isClaimVerified === false)) {
+            return false
+        }
+        return true
+    }
+
     async createClaim({userAddress, claimTopic, docGen}:CreateClaimParams) {
         return await this.claimRepository.create({
             claimUserKey: compositeKey(userAddress, claimTopic),
-            userAddress: userAddress,
+            userAddress: userAddress.toLowerCase(),
             claimTopic: claimTopic,
             docGen: docGen,
             isClaimVerified: false
@@ -67,16 +75,17 @@ export class ClaimService {
     }
 
     async updateDocgen({userAddress, claimTopic, docGen}:UpdateDocgenParams) {
-        return await this.claimRepository.update(
+        const [rows, entity] = await this.claimRepository.update(
             {docGen: docGen}, 
-            {where : {claimUserKey: compositeKey(userAddress, claimTopic)}
-        })
+            {where : {claimUserKey: compositeKey(userAddress, claimTopic), }, returning: true}
+        )
+        return entity;
     }
 
     async verifyClaim({userAddress, claimTopic}:VerifyClaimParams) {
-        return await this.claimRepository.update(
+        const [rows, entity] = await this.claimRepository.update(
             {isClaimVerified: true}, 
-            {where : {claimUserKey: compositeKey(userAddress, claimTopic)}
-        })
+            {where : {claimUserKey: compositeKey(userAddress, claimTopic)}, returning: true})
+        return entity;
     }
 }

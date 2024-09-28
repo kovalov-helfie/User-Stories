@@ -27,6 +27,11 @@ export class UserService {
         return await this.userRepository.findByPk(userAddress.toLowerCase())
     }
 
+    async isUserExist({userAddress}:FindUserParams) {
+        const user = await this.userRepository.findByPk(userAddress.toLowerCase())
+        return user ? true : false
+    }
+
     async isUserVerified({userAddress}:FindUserParams) {
         const user = await this.userRepository.findByPk(userAddress.toLowerCase())
         if(user) {
@@ -40,9 +45,10 @@ export class UserService {
     }
 
     async verifyUser({userAddress}:VerifyUserParams) {
-        return await this.userRepository.update(
+        const [rows, entity] = await this.userRepository.update(
             {isVerified: true}, 
-            {where : {userAddress: userAddress.toLowerCase()}}
+            {where : {userAddress: userAddress.toLowerCase()}, returning: true}
         )
+        return entity
     }
 }
