@@ -95,6 +95,10 @@ export class UserClaimService {
         return await this.claimRepository.findByPk(compositeKey(userAddress, claimTopic))
     }
 
+    async getClaimDocgen({userAddress, claimTopic}:FindClaimById) {
+        return (await this.claimRepository.findByPk(compositeKey(userAddress, claimTopic))).docGen
+    }
+
     async isClaimVerified({userAddress, claimTopic}:FindClaimById) {
         const claim = await this.claimRepository.findByPk(compositeKey(userAddress, claimTopic))
         if(claim) {

@@ -10,12 +10,13 @@ export class Claim extends Model<Claim> {
     claimUserKey: string;
     @ForeignKey(() => User)
     @Column({type: DataType.STRING, allowNull: false})
+    @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
     userAddress: string;
     @Column({type: DataType.BIGINT, allowNull: false})
     @ApiProperty({type: BigInt, example: 1})
     claimTopic: number;
     @Column({type: DataType.STRING, allowNull: false})
-    @ApiProperty({type: String, example: ""})
+    @ApiProperty({type: String, example: "example"})
     docGen: string;
     @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: false})
     @ApiProperty({type: Boolean, example: false})
