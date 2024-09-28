@@ -5,7 +5,7 @@ import { User } from "../users/user.entity";
 @Table
 export class Asset extends Model<Asset> {
     @PrimaryKey
-    @Column({type: DataType.NUMBER, autoIncrement: true, allowNull: false})
+    @Column({type: DataType.INTEGER, autoIncrement: true, allowNull: false})
     @ApiProperty({type: Number, example: 0})
     id: number;
     @ForeignKey(() => User)

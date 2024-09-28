@@ -1,5 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Column, DataType, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { Identity } from "../identities/identity.entity";
+import { Claim } from "../claims/claim.entity";
 
 @Table
 export class User extends Model<User> {
@@ -7,6 +9,7 @@ export class User extends Model<User> {
     @Column({type: DataType.STRING, allowNull: false})
     @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
     userAddress: string;
+    @ForeignKey(() => Identity)
     @Column({type: DataType.STRING, allowNull: true})
     @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
     identityAddress: string;
@@ -16,4 +19,8 @@ export class User extends Model<User> {
     @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: false})
     @ApiProperty({type: Boolean, example: false})
     isAdmin: boolean;
+    @HasMany(() => Claim)
+    claims: Claim[];
+    @BelongsTo(() => Identity)
+    identity: Identity  
 }

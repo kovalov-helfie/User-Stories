@@ -1,17 +1,17 @@
 import { BadRequestException, Body, Controller, ForbiddenException, Get, Param, Patch, Post, UnauthorizedException } from "@nestjs/common";
-import { UserClaimService } from "./user-claim.service";
 import { ApiTags, ApiResponse, ApiOperation, ApiParam } from "@nestjs/swagger";
 import { User } from "./user.entity";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { VerifyUserDto } from "./dto/verify-user.dto";
 import { SignatureService } from "../signatures/signature.service";
 import { SetIdentityDto } from "./dto/set-identity.dto";
+import { ApiService } from "../api/api.service";
 
 @ApiTags('Users')
 @Controller('/users')
 export class UserController {
     constructor(
-        private readonly userClaimService: UserClaimService, 
+        private readonly apiService: ApiService,
         private readonly signatureService: SignatureService) {
     }
 
@@ -19,7 +19,7 @@ export class UserController {
     @ApiResponse({status: 200, description: 'all users', type: [User]})
     @ApiOperation({summary: "retrieve all users"})
     async getUsers() {
-        return await this.userClaimService.findAllUsers();
+        return await this.apiService.findAllUsers();
     }
 
     @Get('/:userAddress')
@@ -27,7 +27,7 @@ export class UserController {
     @ApiOperation({summary: "retrieve user by address"})
     @ApiParam({name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'})
     async getUser(@Param('userAddress') userAddress: string) {
-        return await this.userClaimService.findUser({userAddress: userAddress});
+        return await this.apiService.findUser({userAddress: userAddress});
     }
 
     @Post('/add-user')
@@ -36,10 +36,10 @@ export class UserController {
     async createUser(@Body() dto: CreateUserDto) {
         if(!(await this.signatureService.verifySignature('createUser', dto.signature, dto.userAddress))) {
             throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
-        } else if(await this.userClaimService.findUser({userAddress: dto.userAddress})) {
+        } else if(await this.apiService.findUser({userAddress: dto.userAddress})) {
             throw new BadRequestException(`User [${dto.userAddress}] already exists`)
         }
-        return await this.userClaimService.createUser({userAddress: dto.userAddress});
+        return await this.apiService.createUser({userAddress: dto.userAddress});
     }
 
     @Patch('/set-identity')
@@ -48,15 +48,15 @@ export class UserController {
     async setIdentity(@Body() dto: SetIdentityDto) {
         if(!(await this.signatureService.verifySignature('setIdentity', dto.signature, dto.senderAddress))) {
             throw new UnauthorizedException(`User [${dto.senderAddress}] not authorized`)
-        } else if(!(await this.userClaimService.isUserExist({userAddress: dto.senderAddress}))) {
+        } else if(!(await this.apiService.isUserExist({userAddress: dto.senderAddress}))) {
             throw new ForbiddenException(`Sender [${dto.senderAddress}] does not exist`)
-        } else if(!(await this.userClaimService.isUserExist({userAddress: dto.userAddress}))) {
+        } else if(!(await this.apiService.isUserExist({userAddress: dto.userAddress}))) {
             throw new ForbiddenException(`User [${dto.userAddress}] does not exist`)
-        } else if(((await this.userClaimService.findUser({userAddress: dto.userAddress})).identityAddress !== '')) {
+        } else if(((await this.apiService.findUser({userAddress: dto.userAddress})).identityAddress !== '')) {
             throw new ForbiddenException(`User identity [${dto.userAddress}] exists`)
         }
 
-        return await this.userClaimService.setIdentity({userAddress: dto.userAddress, identityAddress: dto.identityAddress});
+        return await this.apiService.setIdentity({userAddress: dto.userAddress, identityAddress: dto.identityAddress});
     }
 
     @Patch('/verify-user')
@@ -65,22 +65,22 @@ export class UserController {
     async verifyUser(@Body() dto: VerifyUserDto) {
         if(!(await this.signatureService.verifySignature('verifyUser', dto.signature, dto.senderAddress))) {
             throw new UnauthorizedException(`User [${dto.senderAddress}] not authorized`)
-        } else if(!(await this.userClaimService.isUserAdmin({userAddress: dto.senderAddress}))) {
+        } else if(!(await this.apiService.isUserAdmin({userAddress: dto.senderAddress}))) {
             throw new ForbiddenException(`Sender [${dto.senderAddress}] is not an admin`)
         } 
         if(dto.verify) {
-            if(await this.userClaimService.isUserVerified({userAddress: dto.userAddress})) {
+            if(await this.apiService.isUserVerified({userAddress: dto.userAddress})) {
                 throw new BadRequestException(`User [${dto.senderAddress}] is already verified`)
-            } else if(await this.userClaimService.areAllClaimsVerified({userAddress: dto.userAddress})) {
+            } else if(await this.apiService.areAllClaimsVerified({userAddress: dto.userAddress})) {
                 throw new BadRequestException(`User [${dto.senderAddress}] claims are not verified`)
             }
         } else {
-            if(await this.userClaimService.isUserVerified({userAddress: dto.userAddress})) {
+            if(await this.apiService.isUserVerified({userAddress: dto.userAddress})) {
                 throw new BadRequestException(`User [${dto.senderAddress}] is already verified`)
             } 
         }
 
-        return await this.userClaimService.verifyUser({userAddress: dto.userAddress, verify: dto.verify});
+        return await this.apiService.verifyUser({userAddress: dto.userAddress, verify: dto.verify});
     }
 
     @Patch('/verify-admin')
@@ -89,21 +89,21 @@ export class UserController {
     async verifyAdmin(@Body() dto: VerifyUserDto) {
         if(!(await this.signatureService.verifySignature('verifyAdmin', dto.signature, dto.senderAddress))) {
             throw new UnauthorizedException(`User [${dto.senderAddress}] not authorized`)
-        } else if(!(await this.userClaimService.isUserAdmin({userAddress: dto.senderAddress}))) {
+        } else if(!(await this.apiService.isUserAdmin({userAddress: dto.senderAddress}))) {
             throw new ForbiddenException(`Sender [${dto.senderAddress}] is not an admin`)
         } 
         if(dto.verify) {
-            if(!(await this.userClaimService.isUserAdmin({userAddress: dto.userAddress}))) {
+            if(!(await this.apiService.isUserAdmin({userAddress: dto.userAddress}))) {
                 throw new ForbiddenException(`User [${dto.userAddress}] is already an admin`)
-            } else if(!(await this.userClaimService.isUserVerified({userAddress: dto.userAddress}))) {
+            } else if(!(await this.apiService.isUserVerified({userAddress: dto.userAddress}))) {
                 throw new BadRequestException(`User [${dto.senderAddress}] is not verified`)
             }
         } else {
-            if(await this.userClaimService.isUserAdmin({userAddress: dto.userAddress})) {
+            if(await this.apiService.isUserAdmin({userAddress: dto.userAddress})) {
                 throw new BadRequestException(`User [${dto.senderAddress}] is not an admin`)
             } 
         }
 
-        return await this.userClaimService.verifyAdmin({userAddress: dto.userAddress, verify: dto.verify});
+        return await this.apiService.verifyAdmin({userAddress: dto.userAddress, verify: dto.verify});
     }
 }

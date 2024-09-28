@@ -1,6 +1,8 @@
 import { Sequelize } from 'sequelize-typescript';
 import { User } from '../users/user.entity';
 import { Claim } from '../claims/claim.entity';
+import { Identity } from '../identities/identity.entity';
+import { Asset } from '../assets/asset.entity';
 
 export const databaseProviders = [
   {
@@ -15,7 +17,7 @@ export const databaseProviders = [
         password: 'admin',
         database: 'test',
       });
-      sequelize.addModels([User,Claim]);
+      sequelize.addModels([User,Claim,Identity,Asset]);
       await sequelize.sync();
       return sequelize;
     },

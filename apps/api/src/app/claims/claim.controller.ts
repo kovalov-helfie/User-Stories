@@ -4,17 +4,17 @@ import { Claim } from "./claim.entity";
 import { CreateClaimDto } from "./dto/create-claim.dto";
 import { VerifyClaimDto } from "./dto/verify-claim.dto";
 import { SignatureService } from "../signatures/signature.service";
-import { UserClaimService } from "../users/user-claim.service";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { FileService } from "../files/file.service";
 import { createReadStream } from "fs";
 import { join } from "path";
+import { ApiService } from "../api/api.service";
 
 @ApiTags('Claims')
 @Controller('/claims')
 export class ClaimController {
     constructor(
-        private readonly userClaimService: UserClaimService, 
+        private readonly apiService: ApiService, 
         private readonly signatureService: SignatureService,
         private readonly fileService: FileService) {
     }
@@ -23,7 +23,7 @@ export class ClaimController {
     @ApiResponse({status: 200, description: 'all claims', type: [Claim]})
     @ApiOperation({summary: "retrieve all claims"})
     async getClaims() {
-        return await this.userClaimService.findAllClaims();
+        return await this.apiService.findAllClaims();
     }
 
     @Get('/:userAddress')
@@ -31,7 +31,7 @@ export class ClaimController {
     @ApiOperation({summary: "retrieve all user claims"})
     @ApiParam({name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'})
     async getClaimsByUser(@Param('userAddress') userAddress: string) {
-        return await this.userClaimService.findAllClaimsByUser({userAddress: userAddress});
+        return await this.apiService.findAllClaimsByUser({userAddress: userAddress});
     }
 
     @Get('/claim/:userAddress-:claimTopic')
@@ -40,7 +40,7 @@ export class ClaimController {
     @ApiParam({name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'})
     @ApiParam({name: 'claimTopic', required: true, description: 'claim topic', type: Number, example: 0})
     async getClaimById(@Param('userAddress') userAddress: string, @Param('claimTopic') claimTopic: string) { 
-        return await this.userClaimService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)});
+        return await this.apiService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)});
     }
 
     // TODO: file size/format filter
@@ -50,12 +50,12 @@ export class ClaimController {
     async createClaim(@Body() dto: CreateClaimDto) {
         if(!(await this.signatureService.verifySignature('createClaim', dto.signature, dto.userAddress))) {
             throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
-        } else if(!(await this.userClaimService.isUserExist({userAddress: dto.userAddress}))) {
+        } else if(!(await this.apiService.isUserExist({userAddress: dto.userAddress}))) {
             throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
-        } else if(await this.userClaimService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic})) {
+        } else if(await this.apiService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic})) {
             throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] already exists`)
         }
-        return await this.userClaimService.createClaim({
+        return await this.apiService.createClaim({
             userAddress: dto.userAddress, 
             claimTopic: dto.claimTopic, 
             docGen: ''
@@ -92,13 +92,13 @@ export class ClaimController {
         const signature = headers['signature']
         if(!(await this.signatureService.verifySignature('updateDocgen', signature, userAddress))) {
             throw new UnauthorizedException(`User [${userAddress}] not authorized`)
-        } else if(!(await this.userClaimService.isUserExist({userAddress: userAddress}))) {
+        } else if(!(await this.apiService.isUserExist({userAddress: userAddress}))) {
             throw new BadRequestException(`User [${userAddress}] does not exist`)
-        } else if(!(await this.userClaimService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
+        } else if(!(await this.apiService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
             throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
         }
         const fileName = await this.fileService.saveFile(file, `${userAddress}-${claimTopic}`)
-        return await this.userClaimService.updateDocgen({
+        return await this.apiService.updateDocgen({
             userAddress: userAddress, 
             claimTopic: Number(claimTopic), 
             docGen: fileName
@@ -111,14 +111,14 @@ export class ClaimController {
     @ApiParam({name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'})
     @ApiParam({name: 'claimTopic', required: true, description: 'claim topic', type: Number, example: 0})
     async getDocgen(@Param('userAddress') userAddress: string, @Param('claimTopic') claimTopic: string): Promise<StreamableFile> {
-      if(!(await this.userClaimService.isUserExist({userAddress: userAddress}))) {
+      if(!(await this.apiService.isUserExist({userAddress: userAddress}))) {
           throw new BadRequestException(`User [${userAddress}] does not exist`)
-      } else if(!(await this.userClaimService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
+      } else if(!(await this.apiService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
           throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
-      } else if((await this.userClaimService.isClaimVerified({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
+      } else if((await this.apiService.isClaimVerified({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
           throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] is already verified`)
       }
-      const docgen = await this.userClaimService.getClaimDocgen({userAddress: userAddress, claimTopic: Number(claimTopic)})
+      const docgen = await this.apiService.getClaimDocgen({userAddress: userAddress, claimTopic: Number(claimTopic)})
       const file = createReadStream(join(process.cwd(), 'static', docgen));
       return new StreamableFile(file, {
         type: 'image/*',
@@ -132,14 +132,14 @@ export class ClaimController {
     async verifyClaim(@Body() dto: VerifyClaimDto) {
         if(!(await this.signatureService.verifySignature('verifyClaim', dto.signature, dto.userAddress))) {
             throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
-        } else if(!(await this.userClaimService.isUserAdmin({userAddress: dto.senderAddress}))) {
+        } else if(!(await this.apiService.isUserAdmin({userAddress: dto.senderAddress}))) {
             throw new BadRequestException(`Sender [${dto.senderAddress}] not verified`)
-        } else if(!(await this.userClaimService.isUserExist({userAddress: dto.userAddress}))) {
+        } else if(!(await this.apiService.isUserExist({userAddress: dto.userAddress}))) {
             throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
-        } else if(!(await this.userClaimService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic}))) {
+        } else if(!(await this.apiService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic}))) {
             throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] does not exist`)
         } 
-        const isClaimVerified = await this.userClaimService.isClaimVerified({userAddress: dto.userAddress, claimTopic: dto.claimTopic})
+        const isClaimVerified = await this.apiService.isClaimVerified({userAddress: dto.userAddress, claimTopic: dto.claimTopic})
         if(dto.verify) {
             if(isClaimVerified) {
                 throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] is already verified`)
@@ -150,6 +150,6 @@ export class ClaimController {
             }
         }
 
-        return await this.userClaimService.verifyClaim({userAddress: dto.userAddress, claimTopic: dto.claimTopic, verify: dto.verify});
+        return await this.apiService.verifyClaim({userAddress: dto.userAddress, claimTopic: dto.claimTopic, verify: dto.verify});
     }
 }
