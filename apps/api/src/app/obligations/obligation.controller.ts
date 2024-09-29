@@ -1,12 +1,8 @@
 
 import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UnauthorizedException } from "@nestjs/common";
 import { ApiTags, ApiResponse, ApiOperation, ApiParam } from "@nestjs/swagger";
-import { Asset } from "./asset.entity";
 import { SignatureService } from "../signatures/signature.service";
-import { CreateAssetDto } from "./dto/create-asset.dto";
-import { UpdateAssetDto } from "./dto/update-asset.dto";
 import { ApiService } from "../api/api.service";
-import { UpdateAssetObligationDto } from "./dto/update-asset-obligation.dto";
 import { Obligation } from "./obligation.entity";
 import { CreateObligationDto } from "./dto/create-obligation.dto";
 import { UpdateObligationDto } from "./dto/update-obligation.dto";
@@ -14,7 +10,7 @@ import { BuyObligationDto } from "./dto/buy-obligation.dto";
 
 @ApiTags('Obligations')
 @Controller('/obligations')
-export class AssetController {
+export class ObligationController {
     constructor(
         private readonly apiService: ApiService,
         private readonly signatureService: SignatureService) {
@@ -75,7 +71,7 @@ export class AssetController {
 
 
     @Patch('obligation/update-obligation')
-    @ApiResponse({status: 200, description: 'update obligation', type: Asset})
+    @ApiResponse({status: 200, description: 'update obligation', type: Obligation})
     @ApiOperation({summary: "update obligation by obligationId"})
     async updateObligation(@Body() dto: UpdateObligationDto) {
         if(!(await this.signatureService.verifySignature('updateDocgen', dto.signature, dto.userAddress))) {
@@ -113,7 +109,7 @@ export class AssetController {
     }
 
     @Patch('obligation/buy-obligation')
-    @ApiResponse({status: 200, description: 'buy obligation', type: Asset})
+    @ApiResponse({status: 200, description: 'buy obligation', type: Obligation})
     @ApiOperation({summary: "buy obligation by obligationId"})
     async buyObligation(@Body() dto: BuyObligationDto) {
         if(!(await this.signatureService.verifySignature('updateDocgen', dto.signature, dto.userAddress))) {
