@@ -27,6 +27,10 @@ interface VerifyUserParams {
 ///
 
 /// Claim Service
+interface FindAllClaimsWithUsers {
+    withUsers: boolean;
+}
+
 interface FindAllByUserParams {
     userAddress: string;
 }
@@ -67,6 +71,10 @@ interface FindIdentityParams {
 ///
 
 /// Asset Service
+interface FindAllAssetsWithObligations {
+    withObligations: boolean;
+}
+
 interface FindAssetById {
     assetId: number;
 }
@@ -213,8 +221,12 @@ export class ApiService {
     ///
 
     /// Claim Service
-    async findAllClaims() {
-        return await this.claimRepository.findAll()
+    async findAllClaims({withUsers}:FindAllClaimsWithUsers) {
+        if(withUsers) {
+            return await this.claimRepository.findAll({include: [User]})
+        } else {
+            return await this.claimRepository.findAll()
+        }
     }
 
     async findAllClaimsByUser({userAddress}:FindAllByUserParams) {
@@ -294,8 +306,12 @@ export class ApiService {
     ///
 
     /// AssetService
-    async findAllAssets() {
-        return await this.assetRepository.findAll()
+    async findAllAssets({withObligations}:FindAllAssetsWithObligations) {
+        if(withObligations) {
+            return await this.assetRepository.findAll({include: [Obligation]})
+        } else {
+            return await this.assetRepository.findAll()
+        }
     }
 
     async findAllAssetsByUser({userAddress}:FindAllByUserParams) {

@@ -1,6 +1,6 @@
 
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UnauthorizedException } from "@nestjs/common";
-import { ApiTags, ApiResponse, ApiOperation, ApiParam } from "@nestjs/swagger";
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, Query, UnauthorizedException } from "@nestjs/common";
+import { ApiTags, ApiResponse, ApiOperation, ApiParam, ApiQuery } from "@nestjs/swagger";
 import { Asset } from "./asset.entity";
 import { SignatureService } from "../signatures/signature.service";
 import { CreateAssetDto } from "./dto/create-asset.dto";
@@ -19,8 +19,9 @@ export class AssetController {
     @Get('/')
     @ApiResponse({status: 200, description: 'all assets', type: [Asset]})
     @ApiOperation({summary: "retrieve all assets"})
-    async getAssets() {
-        return await this.apiService.findAllAssets();
+    @ApiQuery({name: 'withObligations', required: true, description: 'assets with obligations', type: Boolean, example: true})
+    async getAssets(@Query('withObligations') withObligations: string) {
+        return await this.apiService.findAllAssets({withObligations: withObligations === 'true'});
     }
 
     @Get(':userAddress')

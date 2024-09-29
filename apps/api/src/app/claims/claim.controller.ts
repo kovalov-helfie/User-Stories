@@ -1,5 +1,5 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UnauthorizedException, UploadedFile, UseInterceptors, Headers, StreamableFile } from "@nestjs/common";
-import { ApiTags, ApiResponse, ApiOperation, ApiParam, ApiBody, ApiConsumes, ApiHeader } from "@nestjs/swagger";
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UnauthorizedException, UploadedFile, UseInterceptors, Headers, StreamableFile, Query } from "@nestjs/common";
+import { ApiTags, ApiResponse, ApiOperation, ApiParam, ApiBody, ApiConsumes, ApiHeader, ApiQuery } from "@nestjs/swagger";
 import { Claim } from "./claim.entity";
 import { CreateClaimDto } from "./dto/create-claim.dto";
 import { VerifyClaimDto } from "./dto/verify-claim.dto";
@@ -22,8 +22,9 @@ export class ClaimController {
     @Get('/')
     @ApiResponse({status: 200, description: 'all claims', type: [Claim]})
     @ApiOperation({summary: "retrieve all claims"})
-    async getClaims() {
-        return await this.apiService.findAllClaims();
+    @ApiQuery({name: 'withUsers', required: true, description: 'claims with users', type: Boolean, example: true})
+    async getClaims(@Query('withUsers') withUsers: string) {
+        return await this.apiService.findAllClaims({withUsers: withUsers === 'true'});
     }
 
     @Get('/:userAddress')
@@ -106,32 +107,37 @@ export class ClaimController {
     }
 
     @Get('/claim/docgen/:userAddress-:claimTopic')
-    @ApiResponse({status: 200, description: 'claim by claimUserKey', type: Claim})
-    @ApiOperation({summary: "retrieve claim by claimUserKey"})
-    @ApiParam({name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'})
-    @ApiParam({name: 'claimTopic', required: true, description: 'claim topic', type: Number, example: 0})
-    async getDocgen(@Param('userAddress') userAddress: string, @Param('claimTopic') claimTopic: string): Promise<StreamableFile> {
-      if(!(await this.apiService.isUserExists({userAddress: userAddress}))) {
-          throw new BadRequestException(`User [${userAddress}] does not exist`)
-      } else if(!(await this.apiService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
-          throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
-      } else if((await this.apiService.isClaimVerified({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
-          throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] is already verified`)
-      }
-      const docgen = await this.apiService.getClaimDocgen({userAddress: userAddress, claimTopic: Number(claimTopic)})
-      const file = createReadStream(join(process.cwd(), 'static', docgen));
-      return new StreamableFile(file, {
-        type: 'image/*',
-        disposition: `attachment; filename="${docgen}"`,
-      });
+    @ApiResponse({ status: 200, description: 'claim by claimUserKey', type: Claim })
+    @ApiOperation({ summary: "retrieve claim by claimUserKey" })
+    @ApiHeader({
+        name: 'signature',
+        description: 'user signature',
+    })
+    @ApiParam({ name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f' })
+    @ApiParam({ name: 'claimTopic', required: true, description: 'claim topic', type: Number, example: 0 })
+    async getDocgen(@Headers() headers, @Param('userAddress') userAddress: string, @Param('claimTopic') claimTopic: string): Promise<StreamableFile> {
+        const signature = headers['signature']
+        if (!(await this.signatureService.verifySignature('updateDocgen', signature, userAddress))) {
+            throw new UnauthorizedException(`User [${userAddress}] not authorized`)
+        } else if (!(await this.apiService.isUserExists({ userAddress: userAddress }))) {
+            throw new BadRequestException(`User [${userAddress}] does not exist`)
+        } else if (!(await this.apiService.findClaimById({ userAddress: userAddress, claimTopic: Number(claimTopic) }))) {
+            throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
+        }
+        const docgen = await this.apiService.getClaimDocgen({ userAddress: userAddress, claimTopic: Number(claimTopic) })
+        const file = createReadStream(join(process.cwd(), 'static', docgen));
+        return new StreamableFile(file, {
+            type: 'image/*',
+            disposition: `attachment; filename="${docgen}"`,
+        });
     }
 
     @Patch('/verify-user-claim')
     @ApiResponse({status: 200, description: 'verify user claim', type: Claim})
     @ApiOperation({summary: "verify user claim"})
     async verifyClaim(@Body() dto: VerifyClaimDto) {
-        if(!(await this.signatureService.verifySignature('verifyClaim', dto.signature, dto.userAddress))) {
-            throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
+        if(!(await this.signatureService.verifySignature('verifyClaim', dto.signature, dto.senderAddress))) {
+            throw new UnauthorizedException(`Sender [${dto.senderAddress}] not authorized`)
         } else if(!(await this.apiService.isUserAdmin({userAddress: dto.senderAddress}))) {
             throw new BadRequestException(`Sender [${dto.senderAddress}] not verified`)
         } else if(!(await this.apiService.isUserExists({userAddress: dto.userAddress}))) {
