@@ -1,20 +1,32 @@
-import { Button, Checkbox, Text, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex } from "@chakra-ui/react"
+import { Button, Checkbox, Text, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex, useDisclosure, Input } from "@chakra-ui/react"
+import { ObligationModal } from "../components/obligation-modal";
+import { UserComponent } from "../components/user-component";
+import { useAccount } from "wagmi";
+import { useGetUser } from "../hooks/users/use-get-user";
+import { useGetUserAssets } from "../hooks/assets/use-get-user-assets";
+import { useState } from "react";
+import { useCreateAsset } from "../hooks/assets/use-create-asset";
+import { HeaderComponent } from "../components/header-component";
 
 export const AssetPage = () => {
-    return <Container maxW={'8xl'} w={'100%'}>
-    <Stack direction={"row"} justifyContent={'space-between'} margin={'30px'}>
-        <w3m-button />
-        <Stack direction={'row'}>
-            <Button colorScheme='blue' size='sm'>
-                Your Identity 0x123
-            </Button>
-            <Checkbox colorScheme='green' size='lg' disabled>User verified</Checkbox>
-        </Stack>
-    </Stack>
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    
+    const { address } = useAccount()
+    const { isPendingUser, userData } = useGetUser(address?.toString())
+    const { isPendingUserAssets, userAssetsData } = useGetUserAssets(address?.toString())
 
+    const [ inputName, setInputName ] = useState('');
+    const [ inputType, setInputType ] = useState('');
+    const [ inputDescription, setInputDescription ] = useState('');
+
+    const createAssetMutation = useCreateAsset();
+
+    return <Container maxW={'8xl'} w={'100%'}>
+    <HeaderComponent userData={userData}/>
+    <UserComponent userData={userData}/>
     <TableContainer>
         <Table variant='simple'>
-            <TableCaption>Assets</TableCaption>
+            <TableCaption>User Assets</TableCaption>
             <Thead>
                 <Tr>
                     <Th isNumeric>Asset id</Th>
@@ -26,56 +38,46 @@ export const AssetPage = () => {
                 </Tr>
             </Thead>
             <Tbody>
-                <Tr>
-                    <Td isNumeric>0</Td>
-                    <Td>0x123</Td>
-                    <Td>Test Asset 1</Td>
-                    <Td>This is a Test Asset 1</Td>
-                    <Td>RWA Test Asset 1</Td>
-                    <Td>
-                        <Button colorScheme='orange' size='sm'>
-                            Unsell this asset
-                        </Button>
-                    </Td>
-                </Tr>
-                <Tr>
-                    <Td isNumeric>1</Td>
-                    <Td>0x123</Td>
-                    <Td>Test Asset 2</Td>
-                    <Td>This is a Test Asset 2</Td>
-                    <Td>RWA Test Asset 2</Td>
-                    <Td>
-                        <Button colorScheme='yellow' size='sm'>
-                            Sell this asset
-                        </Button>
-                    </Td>
-                </Tr>
-                <Tr>
-                    <Td isNumeric>2</Td>
-                    <Td>0x123</Td>
-                    <Td>Test Asset 3</Td>
-                    <Td>This is a Test Asset 3</Td>
-                    <Td>RWA Test Asset 3</Td>
-                    <Td>
-                        <Button colorScheme='yellow' size='sm'>
-                            Sell this asset
-                        </Button>
-                    </Td>
-                </Tr>
-                <Tr>
-                    <Td isNumeric>3</Td>
-                    <Td>0x123</Td>
-                    <Td>Test Asset 4</Td>
-                    <Td>This is a Test Asset 4</Td>
-                    <Td>RWA Test Asset 4</Td>
-                    <Td>
-                        <Button colorScheme='yellow' size='sm'>
-                            Sell this asset
-                        </Button>
-                    </Td>
-                </Tr>
+                {userAssetsData?.map((element: any) => {
+                    return (
+                        <Tr key={`${element.id}`}>
+                            <Td>{element?.id}</Td>
+                            <Td>{element?.userAddress}</Td>
+                            <Td>{element?.name}</Td>
+                            <Td>{element?.description}</Td>
+                            <Td>{element?.type}</Td>
+                            <Td>
+                                <ObligationModal isOpen={isOpen} onClose={onClose}/>
+                                <Button colorScheme='yellow' size='sm' onClick={onOpen}>
+                                    Sell this asset
+                                </Button>
+                            </Td>
+                        </Tr>
+                    )
+                })}
             </Tbody>
         </Table>
     </TableContainer>
+    <Flex w={'100%'} justifyContent={'center'}>
+            <Stack spacing={3} maxW={'2xl'}>
+                <Input placeholder='Name' value={inputName} onChange={(e) => setInputName(e.target.value)} />
+                <Input placeholder='Type' value={inputType} onChange={(e) => setInputType(e.target.value)} />
+                <Input placeholder='Description' value={inputDescription} onChange={(e) => setInputDescription(e.target.value)} />
+
+                <Button colorScheme='blue' onClick={() => {
+                    setInputName('')
+                    setInputType('')
+                    setInputDescription('')
+                    createAssetMutation.mutate({
+                        userAddress: address?.toString(), 
+                        name: inputName,
+                        description: inputDescription, 
+                        type: inputType,
+                    })}}
+                    >
+                    Mint Asset
+                </Button>
+            </Stack>
+        </Flex>
 </Container>
 }
