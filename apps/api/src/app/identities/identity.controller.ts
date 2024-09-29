@@ -36,7 +36,7 @@ export class IdentityController {
             throw new UnauthorizedException(`User [${dto.senderAddress}] not authorized`)
         } else if(await this.apiService.isIdentityExist({identityAddress: dto.identityAddress})) {
             throw new BadRequestException(`Identity [${dto.identityAddress}] already exists`)
-        } else if(await this.apiService.isUserExist({userAddress: dto.senderAddress})) {
+        } else if(await this.apiService.isUserExists({userAddress: dto.senderAddress})) {
             throw new BadRequestException(`User [${dto.senderAddress}] does not exists`)
         } 
         return await this.apiService.createIdentity({

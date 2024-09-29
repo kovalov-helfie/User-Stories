@@ -1,9 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { ASSET_REPOSITORY, CLAIM_REPOSITORY, IDENTITY_REPOSITORY, USER_REPOSITORY } from "../constants";
+import { ASSET_REPOSITORY, CLAIM_REPOSITORY, IDENTITY_REPOSITORY, OBLIGATION_REPOSITORY, USER_REPOSITORY } from "../constants";
 import { Claim } from "../claims/claim.entity";
 import { Identity } from "../identities/identity.entity";
 import { Asset } from "../assets/asset.entity";
 import { User } from "../users/user.entity";
+import { Obligation } from "../obligations/obligation.entity";
 
 /// User Service
 interface CreateUserParams {
@@ -82,8 +83,58 @@ interface UpdateAssetUserParams {
     userAddress: string;
 }
 
+interface isAvailableToCreateObligationParams {
+    userAddress: string;
+    obligationId: number;
+}
+
+interface UpdateAssetObligationParams {
+    assetId: number;
+    obligationId: number;
+}
+
 interface FindAssetParams {
     assetId: number;
+}
+///
+
+/// Obligation Service
+interface FindObligationByAssetId {
+    assetId: number;
+}
+
+interface FindObligationById {
+    obligationId: number;
+}
+
+interface CreateObligationParams {
+    assetId: number;
+    userAddress: string;
+    minPurchaseAmount: number;
+    lockupPeriod: number;
+    transferRestrictionAddress: string;
+}
+
+interface UpdateObligationParams {
+    obligationId: number;
+    userAddress: string;
+    minPurchaseAmount: number;
+    lockupPeriod: number;
+    transferRestrictionAddress: string;
+}
+
+interface ExecuteObligationParams {
+    obligationId: number;
+    isExecuted: boolean;
+}
+
+interface FindObligationParams {
+    obligationId: number;
+}
+
+interface FindObligationByOwnerParams {
+    obligationId: number;
+    userAddress: string;
 }
 ///
 
@@ -98,6 +149,7 @@ export class ApiService {
         @Inject(CLAIM_REPOSITORY) private readonly claimRepository: typeof Claim,
         @Inject(IDENTITY_REPOSITORY) private readonly identityRepository: typeof Identity,
         @Inject(ASSET_REPOSITORY) private readonly assetRepository: typeof Asset,
+        @Inject(OBLIGATION_REPOSITORY) private readonly obligationRepository: typeof Obligation,
     ) {
     }
 
@@ -138,7 +190,7 @@ export class ApiService {
         return entity
     }
 
-    async isUserExist({userAddress}:FindUserParams) {
+    async isUserExists({userAddress}:FindUserParams) {
         const user = await this.userRepository.findByPk(userAddress.toLowerCase())
         return user ? true : false
     }
@@ -253,7 +305,7 @@ export class ApiService {
     async findAssetById({assetId}:FindAssetById) {
         return await this.assetRepository.findByPk(assetId)
     }
-
+    
     async isAssetExists({assetId}:FindAssetById) {
         const asset = await this.assetRepository.findByPk(assetId)
         return asset ? true : false
@@ -277,9 +329,133 @@ export class ApiService {
         return entity;
     }
 
-    async isAssetExist({assetId}:FindAssetParams) {
-        const identity = await this.assetRepository.findByPk(assetId)
-        return identity ? true : false
+    async updateAssetObligation({assetId, obligationId}:UpdateAssetObligationParams) {
+        const [rows, entity] = await this.assetRepository.update(
+            {obligationId: obligationId}, 
+            {where : {id: assetId, }, returning: true}
+        )
+        return entity;
     }
+
+    async isAssetExist({assetId}:FindAssetParams) {
+        const asset = await this.assetRepository.findByPk(assetId)
+        return asset ? true : false
+    }
+    ///
+
+    /// ObligationService
+        async findAllObligations() {
+            return await this.obligationRepository.findAll()
+        }
+
+        async findObligationsByAsset({assetId}:FindObligationByAssetId) {
+            return await this.obligationRepository.findAll({where: {assetId: assetId}})
+        }
+
+        async findObligationById({obligationId}:FindObligationById) {
+            return await this.obligationRepository.findByPk(obligationId)
+        }
+
+        async getObligationUnlockDate({obligationId}:FindObligationById) {
+            const obligation = await this.obligationRepository.findByPk(obligationId)
+            const date = obligation?.createdAt
+            date.setSeconds(date?.getSeconds() + obligation?.lockupPeriod)
+            return date;
+        }
+
+        async createObligation({assetId, userAddress, lockupPeriod, minPurchaseAmount, transferRestrictionAddress}:CreateObligationParams) {
+            return await this.obligationRepository.create({
+                assetId: assetId,
+                userAddress: userAddress.toLowerCase(),
+                lockupPeriod: lockupPeriod,
+                minPurchaseAmount: minPurchaseAmount,
+                transferRestrictionAddress: transferRestrictionAddress.toLowerCase(),
+                isExecuted: false,
+            })
+        }
+
+        async updateObligation({obligationId, userAddress, lockupPeriod, minPurchaseAmount, transferRestrictionAddress}:UpdateObligationParams) {
+            const [rows, entity] = await this.obligationRepository.update(
+                {
+                    userAddress: userAddress,
+                    lockupPeriod: lockupPeriod, 
+                    minPurchaseAmount: minPurchaseAmount, 
+                    transferRestrictionAddress: transferRestrictionAddress
+                }, 
+                {where : {id: obligationId, }, returning: true}
+            )
+            return entity;
+        }
+    
+        async executeObligation({obligationId, isExecuted}:ExecuteObligationParams) {
+            const [rows, entity] = await this.obligationRepository.update(
+                {isExecuted: isExecuted}, 
+                {where : {id: obligationId, }, returning: true}
+            )
+            return entity;
+        }
+        
+        async isObligationExists({obligationId}:FindObligationParams) {
+            const obligation = await this.obligationRepository.findByPk(obligationId)
+            return obligation ? true : false
+        }
+
+        async isObligationExecuted({obligationId}:FindObligationParams) {
+            const obligation = await this.obligationRepository.findByPk(obligationId)
+            return obligation?.isExecuted
+        }
+
+        async isObligationOwner({obligationId, userAddress}:FindObligationByOwnerParams) {
+            const obligation = await this.obligationRepository.findByPk(obligationId)
+            if(obligation.isExecuted) {
+                if(obligation?.userAddress === userAddress.toLowerCase()) {
+                    return true;
+                }
+            }
+            return obligation?.userAddress === userAddress.toLowerCase()
+        }
+
+        async isObligationNotLocked({userAddress, obligationId}:isAvailableToCreateObligationParams) {
+            const obligation = await this.obligationRepository.findByPk(obligationId)
+            if(obligation) {
+                if(obligation.isExecuted) {
+                    if(obligation.userAddress !== userAddress.toLowerCase()) {
+                        const date = obligation.createdAt
+                        date.setSeconds(date.getSeconds() + obligation.lockupPeriod)
+                        if(Date.now() >= date) {
+                            return true
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        async isObligationRestrictedAddress({userAddress, obligationId}:isAvailableToCreateObligationParams) {
+            const obligation = await this.obligationRepository.findByPk(obligationId)
+            if(obligation) {
+                if(obligation.transferRestrictionAddress === 
+                    userAddress.toLowerCase()) {
+                    return true
+                }
+            }
+            return false;
+        }
+
+        async isAvailableToUpdateObligation({userAddress, obligationId}:isAvailableToCreateObligationParams) {
+            const obligation = await this.obligationRepository.findByPk(obligationId)
+            if(obligation) {
+                if(obligation.isExecuted) {
+                    if(obligation.userAddress === userAddress.toLowerCase()) {
+                        const date = obligation.createdAt
+                        date.setSeconds(date.getSeconds() + obligation.lockupPeriod)
+                        if(Date.now() >= date) {
+                            return true
+                        }
+                    }
+                }
+            }
+            return false;
+        }
     ///
 }

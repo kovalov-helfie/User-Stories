@@ -2,6 +2,7 @@ import { ApiProperty } from "@nestjs/swagger";
 import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { Identity } from "../identities/identity.entity";
 import { Claim } from "../claims/claim.entity";
+import { Asset } from "../assets/asset.entity";
 
 @Table
 export class User extends Model<User> {
@@ -21,6 +22,8 @@ export class User extends Model<User> {
     isAdmin: boolean;
     @HasMany(() => Claim)
     claims: Claim[];
+    @HasMany(() => Asset)
+    assets: Asset[];
     @BelongsTo(() => Identity)
     identity: Identity  
 }

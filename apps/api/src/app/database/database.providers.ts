@@ -3,6 +3,7 @@ import { User } from '../users/user.entity';
 import { Claim } from '../claims/claim.entity';
 import { Identity } from '../identities/identity.entity';
 import { Asset } from '../assets/asset.entity';
+import { Obligation } from '../obligations/obligation.entity';
 
 export const databaseProviders = [
   {
@@ -17,7 +18,7 @@ export const databaseProviders = [
         password: 'admin',
         database: 'test',
       });
-      sequelize.addModels([User,Claim,Identity,Asset]);
+      sequelize.addModels([User,Claim,Identity,Asset,Obligation]);
       await sequelize.sync();
       return sequelize;
     },

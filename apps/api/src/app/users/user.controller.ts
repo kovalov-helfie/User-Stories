@@ -48,9 +48,9 @@ export class UserController {
     async setIdentity(@Body() dto: SetIdentityDto) {
         if(!(await this.signatureService.verifySignature('setIdentity', dto.signature, dto.senderAddress))) {
             throw new UnauthorizedException(`User [${dto.senderAddress}] not authorized`)
-        } else if(!(await this.apiService.isUserExist({userAddress: dto.senderAddress}))) {
+        } else if(!(await this.apiService.isUserExists({userAddress: dto.senderAddress}))) {
             throw new ForbiddenException(`Sender [${dto.senderAddress}] does not exist`)
-        } else if(!(await this.apiService.isUserExist({userAddress: dto.userAddress}))) {
+        } else if(!(await this.apiService.isUserExists({userAddress: dto.userAddress}))) {
             throw new ForbiddenException(`User [${dto.userAddress}] does not exist`)
         } else if(((await this.apiService.findUser({userAddress: dto.userAddress})).identityAddress !== '')) {
             throw new ForbiddenException(`User identity [${dto.userAddress}] exists`)

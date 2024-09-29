@@ -1,6 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { BelongsTo, Column, DataType, ForeignKey, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { BelongsTo, Column, DataType, ForeignKey, HasMany, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { User } from "../users/user.entity";
+import { Obligation } from "../obligations/obligation.entity";
 
 @Table
 export class Asset extends Model<Asset> {
@@ -12,6 +13,10 @@ export class Asset extends Model<Asset> {
     @Column({type: DataType.STRING, allowNull: false})
     @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
     userAddress: string;
+    @ForeignKey(() => Obligation)
+    @Column({type: DataType.INTEGER, allowNull: true})
+    @ApiProperty({type: Number, example: 0})
+    obligationId: number;
     @Column({type: DataType.STRING, allowNull: false})
     @ApiProperty({type: String, example: "Test_Asset"})
     name: string;
@@ -23,4 +28,6 @@ export class Asset extends Model<Asset> {
     type: string;
     @BelongsTo(() => User)
     user: User
+    @BelongsTo(() => Obligation)
+    obligation: Obligation
 }

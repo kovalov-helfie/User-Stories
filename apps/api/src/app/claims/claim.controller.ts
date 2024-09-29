@@ -50,7 +50,7 @@ export class ClaimController {
     async createClaim(@Body() dto: CreateClaimDto) {
         if(!(await this.signatureService.verifySignature('createClaim', dto.signature, dto.userAddress))) {
             throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
-        } else if(!(await this.apiService.isUserExist({userAddress: dto.userAddress}))) {
+        } else if(!(await this.apiService.isUserExists({userAddress: dto.userAddress}))) {
             throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
         } else if(await this.apiService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic})) {
             throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] already exists`)
@@ -92,7 +92,7 @@ export class ClaimController {
         const signature = headers['signature']
         if(!(await this.signatureService.verifySignature('updateDocgen', signature, userAddress))) {
             throw new UnauthorizedException(`User [${userAddress}] not authorized`)
-        } else if(!(await this.apiService.isUserExist({userAddress: userAddress}))) {
+        } else if(!(await this.apiService.isUserExists({userAddress: userAddress}))) {
             throw new BadRequestException(`User [${userAddress}] does not exist`)
         } else if(!(await this.apiService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
             throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
@@ -111,7 +111,7 @@ export class ClaimController {
     @ApiParam({name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'})
     @ApiParam({name: 'claimTopic', required: true, description: 'claim topic', type: Number, example: 0})
     async getDocgen(@Param('userAddress') userAddress: string, @Param('claimTopic') claimTopic: string): Promise<StreamableFile> {
-      if(!(await this.apiService.isUserExist({userAddress: userAddress}))) {
+      if(!(await this.apiService.isUserExists({userAddress: userAddress}))) {
           throw new BadRequestException(`User [${userAddress}] does not exist`)
       } else if(!(await this.apiService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
           throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
@@ -134,7 +134,7 @@ export class ClaimController {
             throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
         } else if(!(await this.apiService.isUserAdmin({userAddress: dto.senderAddress}))) {
             throw new BadRequestException(`Sender [${dto.senderAddress}] not verified`)
-        } else if(!(await this.apiService.isUserExist({userAddress: dto.userAddress}))) {
+        } else if(!(await this.apiService.isUserExists({userAddress: dto.userAddress}))) {
             throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
         } else if(!(await this.apiService.findClaimById({userAddress: dto.userAddress, claimTopic: dto.claimTopic}))) {
             throw new BadRequestException(`Claim [${dto.userAddress}-${dto.claimTopic}] does not exist`)
