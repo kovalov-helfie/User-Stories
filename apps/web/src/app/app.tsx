@@ -1,10 +1,11 @@
-import NxWelcome from './nx-welcome';
+import { AppKitProvider } from '../components/app-kit-provider';
+import { ChakraProvider } from '@chakra-ui/react'
 
 export function App() {
   return (
-    <div>
-      <NxWelcome title="web" />
-    </div>
+    <ChakraProvider>
+      <AppKitProvider/>
+    </ChakraProvider>
   );
 }
 
