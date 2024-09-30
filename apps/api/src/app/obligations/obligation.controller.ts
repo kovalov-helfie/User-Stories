@@ -1,6 +1,6 @@
 
-import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, UnauthorizedException } from "@nestjs/common";
-import { ApiTags, ApiResponse, ApiOperation, ApiParam } from "@nestjs/swagger";
+import { BadRequestException, Body, Controller, Delete, Get, Param, Patch, Post, Query, UnauthorizedException } from "@nestjs/common";
+import { ApiTags, ApiResponse, ApiOperation, ApiParam, ApiQuery } from "@nestjs/swagger";
 import { SignatureService } from "../signatures/signature.service";
 import { ApiService } from "../api/api.service";
 import { Obligation } from "./obligation.entity";
@@ -20,8 +20,11 @@ export class ObligationController {
     @Get('/')
     @ApiResponse({status: 200, description: 'all obligations', type: [Obligation]})
     @ApiOperation({summary: "retrieve all obligations"})
-    async getObligations() {
-        return await this.apiService.findAllObligations();
+    @ApiQuery({name: 'withAssets', required: true, description: 'obligations with assets', type: Boolean, example: true})
+    @ApiQuery({name: 'isNotExecuted', required: false, description: 'only is not executed obligations', type: Boolean, example: false})
+    async getObligations(@Query('withAssets') withAssets: string, @Query('isNotExecuted') isNotExecuted: string | null) {
+        const isNotExec = isNotExecuted !== null ? isNotExecuted === 'false' : null;
+        return await this.apiService.findAllObligations({withAssets: withAssets === 'true', isNotExecuted: isNotExec});
     }
 
     @Get('/:assetId')

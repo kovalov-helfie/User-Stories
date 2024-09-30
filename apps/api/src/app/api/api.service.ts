@@ -112,6 +112,11 @@ interface FindAssetParams {
 ///
 
 /// Obligation Service
+interface FindAllObligationsWithAssets {
+    withAssets: boolean;
+    isNotExecuted?: boolean;
+}
+
 interface FindObligationByAssetId {
     assetId: number;
 }
@@ -376,8 +381,19 @@ export class ApiService {
     ///
 
     /// ObligationService
-        async findAllObligations() {
-            return await this.obligationRepository.findAll()
+        async findAllObligations({withAssets, isNotExecuted}:FindAllObligationsWithAssets) {
+            if(isNotExecuted !== null && withAssets) {
+                return await this.obligationRepository.findAll({
+                    where: { isExecuted: isNotExecuted},
+                    include: [Asset]
+                })
+            } else if(withAssets) {
+                return await this.obligationRepository.findAll({
+                    include: [Asset]
+                })
+            } else {
+                return await this.obligationRepository.findAll()
+            }
         }
 
         async findObligationByAsset({assetId}:FindObligationByAssetId) {

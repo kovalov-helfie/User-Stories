@@ -86,7 +86,7 @@ export class AssetController {
     @ApiResponse({status: 200, description: 'update userAddress on specific asset', type: Asset})
     @ApiOperation({summary: "update userAddress by assetId"})
     async updateUserAsset(@Body() dto: UpdateAssetDto) {
-        if(!(await this.signatureService.verifySignature('updateDocgen', dto.signature, dto.userAddress))) {
+        if(!(await this.signatureService.verifySignature('updateUserAsset', dto.signature, dto.userAddress))) {
             throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
         } else if(!(await this.apiService.isUserExists({userAddress: dto.userAddress}))) {
             throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
