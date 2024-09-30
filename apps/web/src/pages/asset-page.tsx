@@ -8,17 +8,19 @@ import { useState } from "react";
 import { useCreateAsset } from "../hooks/assets/use-create-asset";
 import { HeaderComponent } from "../components/header-component";
 import { useDeleteObligation } from "../hooks/obligations/use-delete-obligation";
+import { zeroAddress } from "viem";
 
 export const AssetPage = () => {
     const { isOpen, onOpen, onClose, } = useDisclosure();
 
     const { address } = useAccount()
-    const { isPendingUser, userData } = useGetUser(address?.toString())
+    const { isLoadingUser, userData } = useGetUser(address?.toString())
     const { isPendingUserAssets, userAssetsData } = useGetUserAssets(address?.toString(), 'true')
 
     const [inputName, setInputName] = useState('');
     const [inputType, setInputType] = useState('');
     const [inputDescription, setInputDescription] = useState('');
+    const [assetId, setAssetId] = useState(0)
 
     const createAssetMutation = useCreateAsset();
     const deleteObligationMutation = useDeleteObligation();
@@ -40,6 +42,10 @@ export const AssetPage = () => {
                     </Tr>
                 </Thead>
                 <Tbody>
+                    <ObligationModal
+                            isOpen={isOpen} onClose={onClose}
+                            assetId={assetId} userAddress={address ?? zeroAddress} />
+
                     {userAssetsData?.map((element: any) => {
                         return (
                             <Tr key={`${element.id}`}>
@@ -49,12 +55,11 @@ export const AssetPage = () => {
                                 <Td>{element?.description}</Td>
                                 <Td>{element?.type}</Td>
                                 <Td>
-                                    <ObligationModal key={`${element.id}-${element?.userAddress}`}
-                                        isOpen={isOpen} onClose={onClose}
-                                        assetId={element?.id} userAddress={element?.userAddress} />
-
                                     <Stack direction={"row"}>
-                                        <Button colorScheme='yellow' size='sm' onClick={onOpen}>
+                                        <Button colorScheme='yellow' size='sm' onClick={() => {
+                                            setAssetId(element?.id)
+                                            onOpen()
+                                        }}>
                                             {!element.obligationId ? 'Create obligation' : 'Edit obligation'}
                                         </Button>
                                         {
