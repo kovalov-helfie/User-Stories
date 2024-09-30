@@ -1,81 +1,63 @@
 import { Button, Checkbox, Input, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex } from "@chakra-ui/react"
+import { HeaderComponent } from "../components/header-component"
+import { UserComponent } from "../components/user-component"
+import { useAccount } from "wagmi"
+import { useGetUser } from "../hooks/users/use-get-user"
+import { useGetObligations } from "../hooks/obligations/use-get-obligations"
+import { useBuyObligation } from "../hooks/obligations/use-buy-obligation"
 
 export const MarketPage = () => {
-    return <Container maxW={'8xl'} w={'100%'}>
-    <Stack direction={"row"} justifyContent={'space-between'} margin={'30px'}>
-        <w3m-button />
-        <Stack direction={'row'}>
-            <Button colorScheme='blue' size='sm'>
-                Your Identity 0x123
-            </Button>
-            <Checkbox colorScheme='green' size='lg' disabled>User verified</Checkbox>
-        </Stack>
-    </Stack>
+    const { address } = useAccount()
+    const { isPendingUser, userData } = useGetUser(address?.toString())
+    const { isPendingObligations, obligationsData } = useGetObligations('true', null)
 
-    <TableContainer>
-        <Table variant='simple'>
-            <TableCaption>Assets</TableCaption>
-            <Thead>
-                <Tr>
-                    <Th isNumeric>Asset id</Th>
-                    <Th>Asset Owner</Th>
-                    <Th>Name</Th>
-                    <Th>Desciption</Th>
-                    <Th>Type</Th>
-                    <Th>Buy Asset</Th>
-                </Tr>
-            </Thead>
-            <Tbody>
-                <Tr>
-                    <Td isNumeric>0</Td>
-                    <Td>0x123</Td>
-                    <Td>Test Asset 1</Td>
-                    <Td>This is a Test Asset 1</Td>
-                    <Td>RWA Test Asset 1</Td>
-                    <Td>
-                        <Button colorScheme='orange' size='sm'>
-                            Buy
-                        </Button>
-                    </Td>
-                </Tr>
-                <Tr>
-                    <Td isNumeric>1</Td>
-                    <Td>0x123</Td>
-                    <Td>Test Asset 2</Td>
-                    <Td>This is a Test Asset 2</Td>
-                    <Td>RWA Test Asset 2</Td>
-                    <Td>
-                        <Button colorScheme='orange' size='sm'>
-                            Buy
-                        </Button>
-                    </Td>
-                </Tr>
-                <Tr>
-                    <Td isNumeric>2</Td>
-                    <Td>0x123</Td>
-                    <Td>Test Asset 3</Td>
-                    <Td>This is a Test Asset 3</Td>
-                    <Td>RWA Test Asset 3</Td>
-                    <Td>
-                        <Button colorScheme='orange' size='sm'>
-                            Buy
-                        </Button>
-                    </Td>
-                </Tr>
-                <Tr>
-                    <Td isNumeric>3</Td>
-                    <Td>0x123</Td>
-                    <Td>Test Asset 4</Td>
-                    <Td>This is a Test Asset 4</Td>
-                    <Td>RWA Test Asset 4</Td>
-                    <Td>
-                        <Button colorScheme='orange' size='sm'>
-                            Buy
-                        </Button>
-                    </Td>
-                </Tr>
-            </Tbody>
-        </Table>
-    </TableContainer>
-</Container>
+    const buyMutation = useBuyObligation()
+
+    return <Container maxW={'8xl'} w={'100%'}>
+        <HeaderComponent userData={userData} />
+        <UserComponent userData={userData} />
+
+        <TableContainer>
+            <Table variant='simple'>
+                <TableCaption>Market Obligations</TableCaption>
+                <Thead>
+                    <Tr>
+                        <Th isNumeric>Asset id</Th>
+                        <Th>Asset Owner</Th>
+                        <Th>Name</Th>
+                        <Th>Desciption</Th>
+                        <Th>Type</Th>
+                        <Th isNumeric>Min purchase Amount</Th>
+                        <Th>Buy Asset</Th>
+                    </Tr>
+                </Thead>
+                <Tbody>
+                    {obligationsData?.map((element: any) => {
+                        return (
+                            <Tr key={`${element?.id}`}>
+                                <Td>{element?.asset?.id}</Td>
+                                <Td>{element?.userAddress}</Td>
+                                <Td>{element?.asset?.name}</Td>
+                                <Td>{element?.asset?.description}</Td>
+                                <Td>{element?.asset?.type}</Td>
+                                <Td>{element?.minPurchaseAmount}</Td>
+                                <Td>
+                                    <Button colorScheme='yellow' size='sm' onClick={() => {
+                                            buyMutation.mutate({
+                                                assetId: element?.asset?.id,
+                                                userAddress: element?.userAddress,
+                                                minPurchaseAmount: element?.minPurchaseAmount,
+                                                obligationId: element?.obligationId
+                                            })
+                                        }}>
+                                            Buy
+                                    </Button>
+                                </Td>
+                            </Tr>
+                        )
+                    })}
+                </Tbody>
+            </Table>
+        </TableContainer>
+    </Container>
 }

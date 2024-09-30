@@ -9,7 +9,7 @@ export const ObligationModal = ({ isOpen, onClose, assetId, userAddress }: { isO
   // TODO: onClick for modals in Map
 
   const { isPendingObligationByAsset, obligationByAssetData } = useGetObligationByAsset(assetId)
-  console.warn(obligationByAssetData)
+
   const [inputMinAmount, setInputMinAmount] = useState(obligationByAssetData?.minPurchaseAmount ?? 0);
   const [inputLockup, setInputLockup] = useState(obligationByAssetData?.lockupPeriod ?? 0);
   const [inputRestrict, setInputRestrict] = useState(obligationByAssetData?.transferRestrictionAddress ?? '');
@@ -52,7 +52,7 @@ export const ObligationModal = ({ isOpen, onClose, assetId, userAddress }: { isO
                 transferRestrictionAddress: inputRestrict,
               })
             }}>
-              { obligationByAssetData ? 'Create ' : 'Edit '}
+              { !obligationByAssetData ? 'Create ' : 'Edit '}
               Obligation for Asset[{assetId}]
             </Button>
           </Stack>

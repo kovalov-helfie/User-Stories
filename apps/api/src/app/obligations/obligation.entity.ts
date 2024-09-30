@@ -27,4 +27,6 @@ export class Obligation extends Model<Obligation> {
     @Column({type: DataType.BOOLEAN, allowNull: false})
     @ApiProperty({type: Boolean, example: false})
     isExecuted: boolean;
+    @BelongsTo(() => Asset)
+    asset: Asset
 }
