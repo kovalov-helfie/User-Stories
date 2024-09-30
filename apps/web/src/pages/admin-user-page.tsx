@@ -2,24 +2,26 @@ import { Button, Checkbox, Text, Stack, Table, Image, TableCaption, TableContain
 import { UserComponent } from "../components/user-component"
 import { useGetUser } from "../hooks/users/use-get-user"
 import { useAccount } from "wagmi"
-import { useVerifyUserClaim } from "../hooks/claims/use-verify-user-claim"
 import { useGetUsers } from "../hooks/users/use-get-users"
 import { HeaderComponent } from "../components/header-component"
+import { useCreateIdentity } from "../hooks/identities/use-create-identity"
+import { useVerifyUser } from "../hooks/users/use-verify-user"
 
 export const AdminUserPage = () => {
     const { address } = useAccount()
     const { isPendingUser, userData } = useGetUser(address?.toString())
     const { isPendingUsers, usersData } = useGetUsers()
 
-    const mutation = useVerifyUserClaim()
+    const deployIdentityMutation = useCreateIdentity()
+    const verifyUserClaim = useVerifyUser()
 
     return <Container maxW={'8xl'} w={'100%'}>
-        <HeaderComponent userData={userData}/>
+        <HeaderComponent userData={userData} />
         <UserComponent userData={userData} />
 
         <TableContainer>
             <Table variant='simple'>
-                <TableCaption>Claim Topics</TableCaption>
+                <TableCaption>Users</TableCaption>
                 <Thead>
                     <Tr>
                         <Th>User Address</Th>
@@ -37,31 +39,30 @@ export const AdminUserPage = () => {
                                         <Text>{element?.userAddress}</Text >
                                     </Stack>
                                 </Td>
-                                <Td isNumeric>{element?.identityAddress}</Td>
+                                <Td>{
+                                    !element?.identityAddress
+                                        ?
+                                        <Button colorScheme='blue' size='sm' onClick={() => deployIdentityMutation.mutate({
+                                            senderAddress: address?.toString(),
+                                            userAddress: element?.userAddress
+                                        })}>
+                                            Deploy Identity
+                                        </Button>
+                                        : element?.identityAddress
+                                }
+                                </Td>
                                 <Td>
                                     {
-                                        !element?.isVerified
-                                            ?
-                                            <Button colorScheme='green' size='sm' onClick={() => mutation.mutate({
+                                            <Button colorScheme={element?.isVerified ? 'red' : 'green'} size='sm' onClick={() => verifyUserClaim.mutate({
                                                 senderAddress: address?.toString(),
                                                 userAddress: element?.userAddress,
-                                                claimTopic: Number(element.claimTopic),
-                                                verify: true
+                                                verify: element?.isVerified ? false : true
                                             })}>
-                                                Verify
-                                            </Button>
-                                            :
-                                            <Button colorScheme='red' size='sm' onClick={() => mutation.mutate({
-                                                senderAddress: address?.toString(),
-                                                userAddress: element?.userAddress,
-                                                claimTopic: Number(element.claimTopic),
-                                                verify: false
-                                            })}>
-                                                Unverify
+                                                { element?.isVerified ? 'Unverify' : 'Verify' }
                                             </Button>
                                     }
                                 </Td>
-                                <Td><Checkbox size="lg" isChecked={element?.isVerified} disabled/></Td>
+                                <Td><Checkbox size="lg" isChecked={element?.isAdmin} disabled /></Td>
                             </Tr>
                         )
                     })}

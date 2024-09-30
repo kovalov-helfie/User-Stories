@@ -3,7 +3,7 @@ import { env } from '../../env'
 import { useSignMessage } from 'wagmi'
 import { verifyMessage } from "../../functions"
 
-export const useVerifyUserClaim = () => { 
+export const useVerifyUser = () => { 
   const queryClient = useQueryClient()
   const { signMessageAsync } = useSignMessage()
 
@@ -12,19 +12,17 @@ export const useVerifyUserClaim = () => {
       variables: { 
         senderAddress: string | undefined,
         userAddress: string | undefined, 
-        claimTopic: number | undefined,
         verify: boolean} ) => {
       if(!variables.senderAddress) {
         throw new Error("No User")
       }
       
-      const verifySignature = await signMessageAsync({message: verifyMessage(variables.senderAddress, 'verifyClaim')})
-      const putFile = fetch(`${env.VITE_API_URL}/claims/verify-user-claim`, { 
+      const verifySignature = await signMessageAsync({message: verifyMessage(variables.senderAddress, 'verifyUser')})
+      const verifyUser = fetch(`${env.VITE_API_URL}/users/verify-user`, { 
         method: 'PATCH', 
         body: JSON.stringify({
             senderAddress: variables.senderAddress, 
-            userAddress: variables.userAddress, 
-            claimTopic: Number(variables.claimTopic), 
+            userAddress: variables.userAddress,
             verify: variables.verify,
             signature: verifySignature},),
         headers: {
@@ -33,7 +31,7 @@ export const useVerifyUserClaim = () => {
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['claims' ,'true'] })
+      queryClient.invalidateQueries({ queryKey: ['users'] })
     },
   })
 
