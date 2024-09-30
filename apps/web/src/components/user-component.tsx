@@ -6,15 +6,9 @@ export function UserComponent({userData}: {userData: any}) {
             <w3m-button />
             <Stack direction={'row'}>
                 {
-                    !userData?.identityAddress 
-                    ?                 
-                        <Button colorScheme='blue' size='sm'>
-                            Deploy Identity
-                        </Button>
-                    : 
-                        <Button disabled>
-                            Identity {userData?.identityAddress}
-                        </Button>
+                    <Button disabled>
+                        Identity {userData?.identityAddress}
+                    </Button>
                 }
                 <Checkbox colorScheme='green' size='lg' isChecked={userData?.isVerified} disabled/>
             </Stack>
