@@ -49,6 +49,7 @@ export const useCreateObligation = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['obligation'] })
+      queryClient.invalidateQueries({ queryKey: ['userAssets'] })
     },
   })
 

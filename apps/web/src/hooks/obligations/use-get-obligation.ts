@@ -2,12 +2,15 @@ import { useQuery } from "@tanstack/react-query"
 import { env } from "../../env"
 
 export const useGetObligationByAsset = (assetId: number) => {
-    const { isPending, error, data } = useQuery({
+    const { isLoading, error, data, } = useQuery({
         queryKey: ['obligation', assetId],
-        queryFn: () =>
-            fetch(`${env.VITE_API_URL}/obligations/${assetId}`).then((res) =>
-            res.json(),
-        ),
+        queryFn: async () => {
+            try {
+                return await fetch(`${env.VITE_API_URL}/obligations/${assetId}`).then((res) => res.json())
+            } catch (error) {
+                return null
+            }
+        }
     })
-    return { isPendingObligationByAsset: isPending, obligationByAssetData: data }
+    return { isLoadingObligationByAsset: isLoading, obligationByAssetData: data }
 }
