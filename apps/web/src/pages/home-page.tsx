@@ -10,7 +10,7 @@ import { HeaderComponent } from "../components/header-component"
 
 export const HomePage = () => {
     const { address } = useAccount()
-    const { isPendingUser, userData } = useGetUser(address?.toString())
+    const { isLoadingUser, userData } = useGetUser(address?.toString())
     const { isPendingUserClaims, userClaimsData } = useGetUserClaims(address?.toString())
     
     const [ inputClaimTopic, setInputClaimTopic ] = useState('');

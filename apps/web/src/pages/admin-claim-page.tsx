@@ -10,7 +10,7 @@ import { HeaderComponent } from "../components/header-component"
 
 export const AdminClaimPage = () => {
     const { address } = useAccount()
-    const { isPendingUser, userData } = useGetUser(address?.toString())
+    const { isLoadingUser, userData } = useGetUser(address?.toString())
     const { isPendingClaims, claimsData } = useGetClaims('true')
 
     const mutation = useVerifyUserClaim()

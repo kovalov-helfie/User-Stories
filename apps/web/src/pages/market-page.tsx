@@ -8,7 +8,7 @@ import { useBuyObligation } from "../hooks/obligations/use-buy-obligation"
 
 export const MarketPage = () => {
     const { address } = useAccount()
-    const { isPendingUser, userData } = useGetUser(address?.toString())
+    const { isLoadingUser, userData } = useGetUser(address?.toString())
     const { isPendingObligations, obligationsData } = useGetObligations('true', null)
 
     const buyMutation = useBuyObligation()

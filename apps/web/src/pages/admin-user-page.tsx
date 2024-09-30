@@ -9,7 +9,7 @@ import { useVerifyUser } from "../hooks/users/use-verify-user"
 
 export const AdminUserPage = () => {
     const { address } = useAccount()
-    const { isPendingUser, userData } = useGetUser(address?.toString())
+    const { isLoadingUser, userData } = useGetUser(address?.toString())
     const { isPendingUsers, usersData } = useGetUsers()
 
     const deployIdentityMutation = useCreateIdentity()
