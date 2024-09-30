@@ -117,12 +117,16 @@ export class ClaimController {
     @ApiParam({ name: 'claimTopic', required: true, description: 'claim topic', type: Number, example: 0 })
     async getDocgen(@Headers() headers, @Param('userAddress') userAddress: string, @Param('claimTopic') claimTopic: string): Promise<StreamableFile> {
         const signature = headers['signature']
-        if (!(await this.signatureService.verifySignature('updateDocgen', signature, userAddress))) {
-            throw new UnauthorizedException(`User [${userAddress}] not authorized`)
-        } else if (!(await this.apiService.isUserExists({ userAddress: userAddress }))) {
+        if (!(await this.apiService.isUserExists({ userAddress: userAddress }))) {
             throw new BadRequestException(`User [${userAddress}] does not exist`)
         } else if (!(await this.apiService.findClaimById({ userAddress: userAddress, claimTopic: Number(claimTopic) }))) {
             throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
+        } 
+        // TODO: image verification
+        if(!(await this.apiService.isUserAdmin({ userAddress: userAddress }))) {
+            // if (!(await this.signatureService.verifySignature('updateDocgen', signature, userAddress))) {
+            //     throw new UnauthorizedException(`User [${userAddress}] not authorized`)
+            // }
         }
         const docgen = await this.apiService.getClaimDocgen({ userAddress: userAddress, claimTopic: Number(claimTopic) })
         const file = createReadStream(join(process.cwd(), 'static', docgen));

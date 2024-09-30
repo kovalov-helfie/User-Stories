@@ -75,6 +75,11 @@ interface FindAllAssetsWithObligations {
     withObligations: boolean;
 }
 
+interface FindAllAssetsByUserWithObligations {
+    userAddress: string;
+    withObligations: boolean;
+}
+
 interface FindAssetById {
     assetId: number;
 }
@@ -134,6 +139,10 @@ interface UpdateObligationParams {
 interface ExecuteObligationParams {
     obligationId: number;
     isExecuted: boolean;
+}
+
+interface DeleteObligationParams {
+    obligationId: number;
 }
 
 interface FindObligationParams {
@@ -314,8 +323,15 @@ export class ApiService {
         }
     }
 
-    async findAllAssetsByUser({userAddress}:FindAllByUserParams) {
-        return await this.assetRepository.findAll({where: {userAddress: userAddress.toLowerCase()}})
+    async findAllAssetsByUser({userAddress, withObligations}:FindAllAssetsByUserWithObligations) {
+        if(withObligations) {
+            return await this.assetRepository.findAll({
+                where: {userAddress: userAddress.toLowerCase()}, 
+                include: [Obligation]
+            })
+        } else {
+            return await this.assetRepository.findAll({where: {userAddress: userAddress.toLowerCase()}})
+        }
     }
 
     async findAssetById({assetId}:FindAssetById) {
@@ -364,8 +380,8 @@ export class ApiService {
             return await this.obligationRepository.findAll()
         }
 
-        async findObligationsByAsset({assetId}:FindObligationByAssetId) {
-            return await this.obligationRepository.findAll({where: {assetId: assetId}})
+        async findObligationByAsset({assetId}:FindObligationByAssetId) {
+            return await this.obligationRepository.findOne({where: {assetId: assetId}})
         }
 
         async findObligationById({obligationId}:FindObligationById) {
@@ -409,6 +425,11 @@ export class ApiService {
                 {where : {id: obligationId, }, returning: true}
             )
             return entity;
+        }
+
+        async deleteObligation({obligationId}:DeleteObligationParams) {
+            const rows = await this.obligationRepository.destroy({where: {id: obligationId}})
+            return obligationId;
         }
         
         async isObligationExists({obligationId}:FindObligationParams) {

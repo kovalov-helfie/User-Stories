@@ -28,8 +28,9 @@ export class AssetController {
     @ApiResponse({status: 200, description: 'user assets', type: [Asset]})
     @ApiOperation({summary: "retrieve all user assets"})
     @ApiParam({name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'})
-    async getAssetsByUser(@Param('userAddress') userAddress: string) {
-        return await this.apiService.findAllAssetsByUser({userAddress: userAddress});
+    @ApiQuery({name: 'withObligations', required: true, description: 'assets with obligations', type: Boolean, example: true})
+    async getAssetsByUser(@Param('userAddress') userAddress: string, @Query('withObligations') withObligations: string) {
+        return await this.apiService.findAllAssetsByUser({userAddress: userAddress, withObligations: withObligations === 'true'});
     }
 
     @Get('asset/:userAddress/:assetId')
@@ -64,7 +65,7 @@ export class AssetController {
     @ApiResponse({status: 200, description: 'update obligation on specific asset', type: Asset})
     @ApiOperation({summary: "update obligation by assetId"})
     async updateObligationAsset(@Body() dto: UpdateAssetObligationDto) {
-        if(!(await this.signatureService.verifySignature('updateObligation', dto.signature, dto.userAddress))) {
+        if(!(await this.signatureService.verifySignature('updateAssetObligation', dto.signature, dto.userAddress))) {
             throw new UnauthorizedException(`User [${dto.userAddress}] not authorized`)
         } else if(!(await this.apiService.isUserExists({userAddress: dto.userAddress}))) {
             throw new BadRequestException(`User [${dto.userAddress}] does not exist`)
