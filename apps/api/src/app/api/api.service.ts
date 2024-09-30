@@ -225,6 +225,14 @@ export class ApiService {
         return false
     }
 
+    async isUserIdentity({userAddress}:FindUserParams) {
+        const user = await this.userRepository.findByPk(userAddress.toLowerCase())
+        if(user) {
+            return user.identityAddress === null
+        }
+        return false
+    }
+
     async isUserAdmin({userAddress}:FindUserParams) {
         const user = await this.userRepository.findByPk(userAddress.toLowerCase())
         if(user) {

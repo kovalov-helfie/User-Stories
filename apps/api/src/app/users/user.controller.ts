@@ -46,13 +46,13 @@ export class UserController {
     @ApiResponse({status: 200, description: 'set user identity', type: User})
     @ApiOperation({summary: "set user identity"})
     async setIdentity(@Body() dto: SetIdentityDto) {
-        if(!(await this.signatureService.verifySignature('setIdentity', dto.signature, dto.senderAddress))) {
+        if(!(await this.signatureService.verifySignature('userSetIdentity', dto.signature, dto.senderAddress))) {
             throw new UnauthorizedException(`User [${dto.senderAddress}] not authorized`)
         } else if(!(await this.apiService.isUserExists({userAddress: dto.senderAddress}))) {
             throw new ForbiddenException(`Sender [${dto.senderAddress}] does not exist`)
         } else if(!(await this.apiService.isUserExists({userAddress: dto.userAddress}))) {
             throw new ForbiddenException(`User [${dto.userAddress}] does not exist`)
-        } else if(((await this.apiService.findUser({userAddress: dto.userAddress})).identityAddress !== '')) {
+        } else if(!(await this.apiService.isUserIdentity({userAddress: dto.userAddress}))) {
             throw new ForbiddenException(`User identity [${dto.userAddress}] exists`)
         }
 
@@ -67,11 +67,11 @@ export class UserController {
             throw new UnauthorizedException(`User [${dto.senderAddress}] not authorized`)
         } else if(!(await this.apiService.isUserAdmin({userAddress: dto.senderAddress}))) {
             throw new ForbiddenException(`Sender [${dto.senderAddress}] is not an admin`)
-        } 
+        }
         if(dto.verify) {
             if(await this.apiService.isUserVerified({userAddress: dto.userAddress})) {
                 throw new BadRequestException(`User [${dto.senderAddress}] is already verified`)
-            } else if(await this.apiService.areAllClaimsVerified({userAddress: dto.userAddress})) {
+            } else if(!(await this.apiService.areAllClaimsVerified({userAddress: dto.userAddress}))) {
                 throw new BadRequestException(`User [${dto.senderAddress}] claims are not verified`)
             }
         } else {
