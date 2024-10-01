@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UnauthorizedException, UploadedFile, UseInterceptors, Headers, StreamableFile, Query } from "@nestjs/common";
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UnauthorizedException, UploadedFile, UseInterceptors, Headers, StreamableFile, Query, ParseFilePipe, FileTypeValidator, MaxFileSizeValidator } from "@nestjs/common";
 import { ApiTags, ApiResponse, ApiOperation, ApiParam, ApiBody, ApiConsumes, ApiHeader, ApiQuery } from "@nestjs/swagger";
 import { Claim } from "./claim.entity";
 import { CreateClaimDto } from "./dto/create-claim.dto";
@@ -9,6 +9,7 @@ import { FileService } from "../files/file.service";
 import { createReadStream } from "fs";
 import { join } from "path";
 import { ApiService } from "../api/api.service";
+import { FILE_TYPES, MAX_FILE_SIZE } from "../constants";
 
 @ApiTags('Claims')
 @Controller('/claims')
@@ -44,7 +45,6 @@ export class ClaimController {
         return await this.apiService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)});
     }
 
-    // TODO: file size/format filter
     @Post('/add-claim')
     @ApiResponse({status: 201, description: 'add user claim', type: Claim})
     @ApiOperation({summary: "add user claim"})
@@ -89,7 +89,13 @@ export class ClaimController {
             @Headers() headers,
             @Param('userAddress') userAddress: string, 
             @Param('claimTopic') claimTopic: string, 
-            @UploadedFile('file') file: Express.Multer.File) {
+            @UploadedFile('file',   
+                new ParseFilePipe({
+                validators: [   
+                    new FileTypeValidator({ fileType: FILE_TYPES }),
+                    new MaxFileSizeValidator({maxSize: MAX_FILE_SIZE })
+                ]
+              }),) file: Express.Multer.File) {
         const signature = headers['signature']
         if(!(await this.signatureService.verifySignature('updateDocgen', signature, userAddress))) {
             throw new UnauthorizedException(`User [${userAddress}] not authorized`)
@@ -97,6 +103,8 @@ export class ClaimController {
             throw new BadRequestException(`User [${userAddress}] does not exist`)
         } else if(!(await this.apiService.findClaimById({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
             throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
+        } else if((await this.apiService.isClaimVerified({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
+            throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] is already verified`)
         }
         const fileName = await this.fileService.saveFile(file, `${userAddress}-${claimTopic}`)
         return await this.apiService.updateDocgen({
@@ -122,11 +130,10 @@ export class ClaimController {
         } else if (!(await this.apiService.findClaimById({ userAddress: userAddress, claimTopic: Number(claimTopic) }))) {
             throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
         } 
-        // TODO: image verification
-        if(!(await this.apiService.isUserAdmin({ userAddress: userAddress }))) {
-            // if (!(await this.signatureService.verifySignature('updateDocgen', signature, userAddress))) {
-            //     throw new UnauthorizedException(`User [${userAddress}] not authorized`)
-            // }
+        else if(!(await this.apiService.isUserAdmin({ userAddress: userAddress }))) {
+            if (!(await this.signatureService.verifySignature('getDocgen', signature, userAddress))) {
+                throw new UnauthorizedException(`User [${userAddress}] not authorized`)
+            }
         }
         const docgen = await this.apiService.getClaimDocgen({ userAddress: userAddress, claimTopic: Number(claimTopic) })
         const file = createReadStream(join(process.cwd(), 'static', docgen));
