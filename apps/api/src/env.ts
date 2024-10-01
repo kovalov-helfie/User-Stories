@@ -1,5 +1,8 @@
 import { z } from 'zod';
 import { createEnv } from 'env'
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 export const env = createEnv({
   client: {},
@@ -12,11 +15,11 @@ export const env = createEnv({
     DB_NAME: z.string().min(1),
   },
   runtimeEnv: { 
-    DB_HOST: process.env.HOST,
-    DB_PORT: process.env.PORT,
-    DB_USERNAME: process.env.PORT,
-    DB_PASSWORD: process.env.PORT,
-    DB_NAME: process.env.PORT,
+    DB_HOST: process.env.DB_HOST,
+    DB_PORT: process.env.DB_PORT,
+    DB_USERNAME: process.env.DB_USERNAME,
+    DB_PASSWORD: process.env.DB_PASSWORD,
+    DB_NAME: process.env.DB_NAME,
    },
   emptyStringAsUndefined: true,
 });

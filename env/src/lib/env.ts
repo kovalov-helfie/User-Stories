@@ -288,7 +288,7 @@ export function createEnv<
 
   const extendedObj = (opts.extends ?? []).reduce((acc, curr) => {
     return Object.assign(acc, curr);
-  }, {});
+  }, {} as never);
   const fullObj = Object.assign(parsed.data, extendedObj);
 
   const env = new Proxy(fullObj, {
