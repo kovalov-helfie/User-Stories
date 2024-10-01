@@ -7,6 +7,7 @@ import { UserComponent } from "../components/user-component"
 import { useCreateUserClaim } from "../hooks/claims/use-create-user-claim"
 import { useState } from "react"
 import { HeaderComponent } from "../components/header-component"
+import { HeaderImage } from "../components/image-component"
 
 export const HomePage = () => {
     const { address } = useAccount()
@@ -46,7 +47,7 @@ export const HomePage = () => {
                             <Td>{element?.userAddress}</Td>
                             <Td isNumeric>{element?.claimTopic}</Td>
                             <Td>
-                                <Image src={`${env.VITE_API_URL}/claims/claim/docgen/${element?.userAddress}-${element?.claimTopic}`} alt='Doc' boxSize='75px' />
+                                <HeaderImage claimTopic={element?.claimTopic}/>
                             </Td>
                             <Td>
                                 <Checkbox isChecked={element?.isClaimVerified} disabled></Checkbox>
