@@ -1,5 +1,5 @@
-import { createEnv } from './lib/create-env';
 import { z } from 'zod';
+import { createEnv } from 'env'
 
 export const env = createEnv({
   clientPrefix: 'VITE_',

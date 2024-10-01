@@ -4,6 +4,7 @@ import { Claim } from '../claims/claim.entity';
 import { Identity } from '../identities/identity.entity';
 import { Asset } from '../assets/asset.entity';
 import { Obligation } from '../obligations/obligation.entity';
+import { env } from '../../env';
 
 export const databaseProviders = [
   {
@@ -11,12 +12,11 @@ export const databaseProviders = [
     useFactory: async () => {
       const sequelize = new Sequelize({
         dialect: 'postgres',
-        //env
-        host: 'localhost',
-        port: 5432,
-        username: 'postgres',
-        password: 'admin',
-        database: 'test',
+        host: env.DB_HOST,
+        port: env.DB_PORT,
+        username: env.DB_USERNAME,
+        password: env.DB_PASSWORD,
+        database: env.DB_NAME,
       });
       sequelize.addModels([User,Claim,Identity,Asset,Obligation]);
       await sequelize.sync();
