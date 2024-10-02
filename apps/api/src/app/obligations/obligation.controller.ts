@@ -90,7 +90,7 @@ export class ObligationController {
             throw new BadRequestException(`Obligation [${dto.obligationId}] does not exist`)
         } 
         if(!(await this.apiService.isObligationExecuted({obligationId: dto.obligationId}))) {
-            if(await this.apiService.isObligationOwner({obligationId: dto.obligationId, userAddress: dto.userAddress})) {
+            if(!(await this.apiService.isObligationOwner({obligationId: dto.obligationId, userAddress: dto.userAddress}))) {
                 throw new BadRequestException(`Not Asset Obligation [${dto.obligationId}] owner [${dto.userAddress}]`)
             }
         } else {

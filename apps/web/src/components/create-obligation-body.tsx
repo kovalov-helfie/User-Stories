@@ -39,6 +39,7 @@ export const CreateObligationBody = ({ assetId, userAddress, modalBody }: { asse
                 minPurchaseAmount: inputMinAmount,
                 lockupPeriod: inputLockup,
                 transferRestrictionAddress: inputRestrict,
+                obligationId: !modalBody?.id ? null : modalBody?.id 
               })
             }}>
               { !modalBody ? 'Create ' : 'Edit '}

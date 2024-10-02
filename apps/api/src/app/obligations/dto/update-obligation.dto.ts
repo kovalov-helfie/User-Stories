@@ -19,7 +19,6 @@ export class UpdateObligationDto {
     @ApiProperty({type: Number, example: 100})
     lockupPeriod: number;
     @IsString()
-    @IsEthereumAddress()
     @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
     transferRestrictionAddress: string;
     @IsString()
