@@ -20,8 +20,8 @@ export const HeaderImage = ({ claimTopic }: { claimTopic: number }) => {
                 if(!address) {
                     throw new Error("No User"); 
                 }
-                const getDocgenSignature = await signMessageAsync({ message: verifyMessage(address, 'getDocgen') })
-                const response = await fetch(`${env.VITE_API_URL}/claims/claim/docgen/${address}-${claimTopic}`, {
+                const getDocgenSignature = await signMessageAsync({ message: verifyMessage(address, 'getDocgen'), account: address })
+                const response = await fetch(`${env.VITE_API_URL}/claims/claim/docgen/${address}/${address}-${claimTopic}`, {
                     headers: {
                         'signature': getDocgenSignature
                     },
