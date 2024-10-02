@@ -1,4 +1,4 @@
-import { Button, Checkbox, Text, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex, Link } from "@chakra-ui/react"
+import { Button, Checkbox, Text, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex, Link, Input, TagLabel, FormControl, FormLabel } from "@chakra-ui/react"
 import { UserComponent } from "../components/user-component"
 import { useGetUser } from "../hooks/users/use-get-user"
 import { useAccount } from "wagmi"
@@ -6,6 +6,7 @@ import { useGetClaims } from "../hooks/claims/use-get-claims"
 import { env } from "../env"
 import { useVerifyUserClaim } from "../hooks/claims/use-verify-user-claim"
 import { HeaderComponent } from "../components/header-component"
+import { useState } from "react"
 
 export const AdminClaimPage = () => {
     const { address } = useAccount()
@@ -15,7 +16,7 @@ export const AdminClaimPage = () => {
     const mutation = useVerifyUserClaim()
 
     return <Container maxW={'8xl'} w={'100%'}>
-        <HeaderComponent userData={userData}/>
+        <HeaderComponent userData={userData} />
         <UserComponent userData={userData} />
 
         {
@@ -26,7 +27,7 @@ export const AdminClaimPage = () => {
                         <Thead>
                             <Tr>
                                 <Th>User Address</Th>
-                                <Th isNumeric>Claim Topic</Th>
+                                <Th>Claim Topic</Th>
                                 <Th>Document</Th>
                                 <Th>Verified</Th>
                             </Tr>
@@ -41,31 +42,30 @@ export const AdminClaimPage = () => {
                                                 <Checkbox size={'lg'} isChecked={element?.user.isVerified} disabled />
                                             </Stack>
                                         </Td>
-                                        <Td isNumeric>{element?.claimTopic}</Td>
+                                        <Td>
+                                            <Text>{element?.claimTopic}</Text >
+                                        </Td>
                                         <Td>
                                             <Image src={`${env.VITE_API_URL}/claims/claim/docgen/${address?.toString()}/${element?.userAddress}-${element?.claimTopic}`} alt='Doc' boxSize='75px' />
                                         </Td>
                                         <Td>
                                             {
-                                                !element?.isClaimVerified
+                                                !element?.user.isVerified
                                                     ?
-                                                    <Button colorScheme='green' size='sm' onClick={() => mutation.mutate({
-                                                        senderAddress: address?.toString(),
-                                                        userAddress: element?.userAddress,
-                                                        claimTopic: Number(element.claimTopic),
-                                                        verify: true
-                                                    })}>
-                                                        Verify
+                                                    <Button colorScheme={!element?.isClaimVerified ? "green" : "red"} size='sm'
+                                                        isDisabled={element?.user.isVerified} onClick={() => {
+                                                            if (!element?.user.isVerified) {
+                                                                mutation.mutate({
+                                                                    senderAddress: address?.toString(),
+                                                                    userAddress: element?.userAddress,
+                                                                    claimTopic: Number(element.claimTopic),
+                                                                    verify: !element?.isClaimVerified
+                                                                })
+                                                            }
+                                                        }}>
+                                                        {!element?.isClaimVerified ? "Verify" : "Unverify"}
                                                     </Button>
-                                                    :
-                                                    <Button colorScheme='red' size='sm' onClick={() => mutation.mutate({
-                                                        senderAddress: address?.toString(),
-                                                        userAddress: element?.userAddress,
-                                                        claimTopic: Number(element.claimTopic),
-                                                        verify: false
-                                                    })}>
-                                                        Unverify
-                                                    </Button>
+                                                    : <Checkbox size={'lg'} isChecked={element?.user.isVerified} disabled />
                                             }
                                         </Td>
                                     </Tr>
