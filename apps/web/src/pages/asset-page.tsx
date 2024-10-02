@@ -28,83 +28,86 @@ export const AssetPage = () => {
     return <Container maxW={'8xl'} w={'100%'}>
         <HeaderComponent userData={userData} />
         <UserComponent userData={userData} />
-        <TableContainer>
-            <Table variant='simple'>
-                <TableCaption>User Assets</TableCaption>
-                <Thead>
-                    <Tr>
-                        <Th isNumeric>Asset id</Th>
-                        <Th>User Address</Th>
-                        <Th>Name</Th>
-                        <Th>Desciption</Th>
-                        <Th>Type</Th>
-                        <Th>Sell</Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    <ObligationModal
+        {
+            userData?.isVerified && <><TableContainer>
+                <Table variant='simple'>
+                    <TableCaption placement="top">User Assets</TableCaption>
+                    <Thead>
+                        <Tr>
+                            <Th isNumeric>Asset id</Th>
+                            <Th>User Address</Th>
+                            <Th>Name</Th>
+                            <Th>Desciption</Th>
+                            <Th>Type</Th>
+                            <Th>Sell</Th>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        <ObligationModal
                             isOpen={isOpen} onClose={onClose}
                             assetId={assetId} userAddress={address ?? zeroAddress} />
 
-                    {userAssetsData?.map((element: any) => {
-                        return (
-                            <Tr key={`${element.id}`}>
-                                <Td>{element?.id}</Td>
-                                <Td>{element?.userAddress}</Td>
-                                <Td>{element?.name}</Td>
-                                <Td>{element?.description}</Td>
-                                <Td>{element?.type}</Td>
-                                <Td>
-                                    <Stack direction={"row"}>
-                                        <Button colorScheme='yellow' size='sm' onClick={() => {
-                                            setAssetId(element?.id)
-                                            onOpen()
-                                        }}>
-                                            {!element.obligationId ? 'Create obligation' : 'Edit obligation'}
-                                        </Button>
-                                        {
-                                            element.obligationId
-                                                ?
-                                                <Button colorScheme='red' size='sm' onClick={() => {
-                                                    deleteObligationMutation.mutate({
-                                                        assetId: element?.id,
-                                                        userAddress: element?.userAddress,
-                                                        obligationId: element?.obligationId
-                                                    })
-                                                }}>
-                                                    Delete Obligation
-                                                </Button>
-                                                : <></>
-                                        }
-                                    </Stack>
-                                </Td>
-                            </Tr>
-                        )
-                    })}
-                </Tbody>
-            </Table>
-        </TableContainer>
-        <Flex w={'100%'} justifyContent={'center'}>
-            <Stack spacing={3} maxW={'2xl'}>
-                <Input placeholder='Name' value={inputName} onChange={(e) => setInputName(e.target.value)} />
-                <Input placeholder='Description' value={inputDescription} onChange={(e) => setInputDescription(e.target.value)} />
-                <Input placeholder='Type' value={inputType} onChange={(e) => setInputType(e.target.value)} />
+                        {userAssetsData?.map((element: any) => {
+                            return (
+                                <Tr key={`${element.id}`}>
+                                    <Td>{element?.id}</Td>
+                                    <Td>{element?.userAddress}</Td>
+                                    <Td>{element?.name}</Td>
+                                    <Td>{element?.description}</Td>
+                                    <Td>{element?.type}</Td>
+                                    <Td>
+                                        <Stack direction={"row"}>
+                                            <Button colorScheme='yellow' size='sm' onClick={() => {
+                                                setAssetId(element?.id)
+                                                onOpen()
+                                            }}>
+                                                {!element.obligationId ? 'Create obligation' : 'Edit obligation'}
+                                            </Button>
+                                            {
+                                                element.obligationId
+                                                    ?
+                                                    <Button colorScheme='red' size='sm' onClick={() => {
+                                                        deleteObligationMutation.mutate({
+                                                            assetId: element?.id,
+                                                            userAddress: element?.userAddress,
+                                                            obligationId: element?.obligationId
+                                                        })
+                                                    }}>
+                                                        Delete Obligation
+                                                    </Button>
+                                                    : <></>
+                                            }
+                                        </Stack>
+                                    </Td>
+                                </Tr>
+                            )
+                        })}
+                    </Tbody>
+                </Table>
+            </TableContainer>
+                <Flex w={'100%'} justifyContent={'center'} margin={'30px'}>
+                    <Stack spacing={3} maxW={'2xl'}>
+                        <Input placeholder='Name' value={inputName} onChange={(e) => setInputName(e.target.value)} />
+                        <Input placeholder='Description' value={inputDescription} onChange={(e) => setInputDescription(e.target.value)} />
+                        <Input placeholder='Type' value={inputType} onChange={(e) => setInputType(e.target.value)} />
 
-                <Button colorScheme='blue' onClick={() => {
-                    setInputName('')
-                    setInputType('')
-                    setInputDescription('')
-                    createAssetMutation.mutate({
-                        userAddress: address?.toString(),
-                        name: inputName,
-                        description: inputDescription,
-                        type: inputType,
-                    })
-                }}
-                >
-                    Mint Asset
-                </Button>
-            </Stack>
-        </Flex>
+                        <Button colorScheme='blue' onClick={() => {
+                            setInputName('')
+                            setInputType('')
+                            setInputDescription('')
+                            createAssetMutation.mutate({
+                                userAddress: address?.toString(),
+                                name: inputName,
+                                description: inputDescription,
+                                type: inputType,
+                            })
+                        }}
+                        >
+                            Mint Asset
+                        </Button>
+                    </Stack>
+                </Flex>
+            </>
+        }
     </Container>
 }

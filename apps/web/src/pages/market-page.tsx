@@ -19,7 +19,7 @@ export const MarketPage = () => {
 
         <TableContainer>
             <Table variant='simple'>
-                <TableCaption>Market Obligations</TableCaption>
+                <TableCaption placement="top">Market Obligations</TableCaption>
                 <Thead>
                     <Tr>
                         <Th isNumeric>Asset id</Th>
@@ -49,7 +49,7 @@ export const MarketPage = () => {
                                                 minPurchaseAmount: element?.minPurchaseAmount,
                                                 obligationId: element?.obligationId
                                             })
-                                        }}>
+                                        }} isDisabled={!userData?.isVerified}>
                                             Buy
                                     </Button>
                                 </Td>

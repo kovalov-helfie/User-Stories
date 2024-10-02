@@ -3,9 +3,9 @@ import { NavLink } from "react-router-dom";
 
 export function HeaderComponent({userData}: {userData: any}) {
     return (
-        <Stack direction={"row"} justifyContent={'space-between'} margin={'30px'}>
+        <Stack direction={"row"} justifyContent={'space-between'} margin={'30px'} fontWeight={'bold'}>
             <NavLink to={'/'}>Profile</NavLink>
-            <NavLink to={'/asset'}>Asset</NavLink>
+            { userData?.isVerified ? <NavLink to={'/asset'}>Asset</NavLink> : <></>}
             <NavLink to={'/market'}>Market</NavLink>
             {
                 userData?.isAdmin 

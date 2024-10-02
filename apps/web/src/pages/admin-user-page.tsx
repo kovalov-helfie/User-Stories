@@ -19,55 +19,57 @@ export const AdminUserPage = () => {
         <HeaderComponent userData={userData} />
         <UserComponent userData={userData} />
 
-        <TableContainer>
-            <Table variant='simple'>
-                <TableCaption>Users</TableCaption>
-                <Thead>
-                    <Tr>
-                        <Th>User Address</Th>
-                        <Th>Identity Address</Th>
-                        <Th>Verified</Th>
-                        <Th>Admin</Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {usersData?.map((element: any) => {
-                        return (
-                            <Tr key={`${element.id}`}>
-                                <Td>
-                                    <Stack direction={"row"}>
-                                        <Text>{element?.userAddress}</Text >
-                                    </Stack>
-                                </Td>
-                                <Td>{
-                                    !element?.identityAddress
-                                        ?
-                                        <Button colorScheme='blue' size='sm' onClick={() => deployIdentityMutation.mutate({
-                                            senderAddress: address?.toString(),
-                                            userAddress: element?.userAddress
-                                        })}>
-                                            Deploy Identity
-                                        </Button>
-                                        : element?.identityAddress
-                                }
-                                </Td>
-                                <Td>
-                                    {
+        {
+            userData?.isAdmin && <TableContainer>
+                <Table variant='simple'>
+                    <TableCaption placement="top">Users</TableCaption>
+                    <Thead>
+                        <Tr>
+                            <Th>User Address</Th>
+                            <Th>Identity Address</Th>
+                            <Th>Verified</Th>
+                            <Th>Admin</Th>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        {usersData?.map((element: any) => {
+                            return (
+                                <Tr key={`${element.id}`}>
+                                    <Td>
+                                        <Stack direction={"row"}>
+                                            <Text>{element?.userAddress}</Text >
+                                        </Stack>
+                                    </Td>
+                                    <Td>{
+                                        !element?.identityAddress
+                                            ?
+                                            <Button colorScheme='blue' size='sm' onClick={() => deployIdentityMutation.mutate({
+                                                senderAddress: address?.toString(),
+                                                userAddress: element?.userAddress
+                                            })}>
+                                                Deploy Identity
+                                            </Button>
+                                            : element?.identityAddress
+                                    }
+                                    </Td>
+                                    <Td>
+                                        {
                                             <Button colorScheme={element?.isVerified ? 'red' : 'green'} size='sm' onClick={() => verifyUserClaim.mutate({
                                                 senderAddress: address?.toString(),
                                                 userAddress: element?.userAddress,
                                                 verify: element?.isVerified ? false : true
                                             })}>
-                                                { element?.isVerified ? 'Unverify' : 'Verify' }
+                                                {element?.isVerified ? 'Unverify' : 'Verify'}
                                             </Button>
-                                    }
-                                </Td>
-                                <Td><Checkbox size="lg" isChecked={element?.isAdmin} disabled /></Td>
-                            </Tr>
-                        )
-                    })}
-                </Tbody>
-            </Table>
-        </TableContainer>
+                                        }
+                                    </Td>
+                                    <Td><Checkbox size="lg" isChecked={element?.isAdmin} disabled /></Td>
+                                </Tr>
+                            )
+                        })}
+                    </Tbody>
+                </Table>
+            </TableContainer>
+        }
     </Container>
 }
