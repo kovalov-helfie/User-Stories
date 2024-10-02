@@ -252,7 +252,7 @@ export class ApiService {
     }
 
     async findAllClaimsByUser({userAddress}:FindAllByUserParams) {
-        return await this.claimRepository.findAll({where: {userAddress: userAddress.toLowerCase()}})
+        return await this.claimRepository.findAll({where: {userAddress: userAddress.toLowerCase()}, order: [['claimTopic', 'ASC']]})
     }
 
     async findClaimById({userAddress, claimTopic}:FindClaimById) {

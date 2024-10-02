@@ -75,9 +75,9 @@ export class UserController {
                 throw new BadRequestException(`User [${dto.senderAddress}] claims are not verified`)
             }
         } else {
-            if(await this.apiService.isUserVerified({userAddress: dto.userAddress})) {
-                throw new BadRequestException(`User [${dto.senderAddress}] is already verified`)
-            } 
+            if(!(await this.apiService.isUserVerified({userAddress: dto.userAddress}))) {
+                throw new BadRequestException(`User [${dto.senderAddress}] is not verified`)
+            }
         }
 
         return await this.apiService.verifyUser({userAddress: dto.userAddress, verify: dto.verify});

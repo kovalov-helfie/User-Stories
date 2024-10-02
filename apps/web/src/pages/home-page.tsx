@@ -41,7 +41,7 @@ export const HomePage = () => {
                 <Tbody>
                     {userClaimsData?.map((element: any) => {
                         return (
-                            <Tr key={`${element.id}`} justifyContent={'center'}>
+                            <Tr key={`${element?.claimUserKey}`} justifyContent={'center'}>
                                 <Td>{element?.userAddress}</Td>
                                 <Td isNumeric>{element?.claimTopic}</Td>
                                 <Td w={'25%'} justifyContent={'center'} justifyItems={'center'}>
@@ -61,7 +61,6 @@ export const HomePage = () => {
                                                         claimTopic: element?.claimTopic,
                                                         docgen: inputEditDoc,
                                                     })
-                                                    history.props.history.push('/')
                                                 }}>
                                                     Edit Claim Topic
                                                 </Button>

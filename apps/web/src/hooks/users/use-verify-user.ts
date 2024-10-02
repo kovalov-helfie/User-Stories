@@ -18,7 +18,7 @@ export const useVerifyUser = () => {
       }
       
       const verifySignature = await signMessageAsync({message: verifyMessage(variables.senderAddress, 'verifyUser')})
-      const verifyUser = fetch(`${env.VITE_API_URL}/users/verify-user`, { 
+      const verifyUser = await fetch(`${env.VITE_API_URL}/users/verify-user`, { 
         method: 'PATCH', 
         body: JSON.stringify({
             senderAddress: variables.senderAddress, 
