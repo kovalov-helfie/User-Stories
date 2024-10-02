@@ -43,13 +43,15 @@ export const MarketPage = () => {
                                 <Td>{element?.minPurchaseAmount}</Td>
                                 <Td>
                                     <Button colorScheme='yellow' size='sm' onClick={() => {
+                                        if(userData?.isVerified && element?.userAddress.toLowerCase() !== userData?.userAddress?.toLowerCase()) {
                                             buyMutation.mutate({
                                                 assetId: element?.asset?.id,
-                                                userAddress: element?.userAddress,
+                                                userAddress: userData?.userAddress,
                                                 minPurchaseAmount: element?.minPurchaseAmount,
-                                                obligationId: element?.obligationId
+                                                obligationId: element?.id
                                             })
-                                        }} isDisabled={!userData?.isVerified}>
+                                        }
+                                        }} isDisabled={!userData?.isVerified || element?.userAddress.toLowerCase() === userData?.userAddress?.toLowerCase()}>
                                             Buy
                                     </Button>
                                 </Td>
