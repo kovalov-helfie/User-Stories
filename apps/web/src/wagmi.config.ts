@@ -12,7 +12,7 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/179229932']
 };
 
-const networks = [ mainnet, arbitrum, sepolia ]
+const networks = [ sepolia, mainnet, arbitrum,  ]
 
 export const wagmiAdapter = new WagmiAdapter({
   networks,
