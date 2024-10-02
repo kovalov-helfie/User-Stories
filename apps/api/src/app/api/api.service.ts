@@ -245,9 +245,9 @@ export class ApiService {
     /// Claim Service
     async findAllClaims({withUsers}:FindAllClaimsWithUsers) {
         if(withUsers) {
-            return await this.claimRepository.findAll({include: [User]})
+            return await this.claimRepository.findAll({include: [User], order: [['claimTopic', 'ASC']]})
         } else {
-            return await this.claimRepository.findAll()
+            return await this.claimRepository.findAll({order: [['claimTopic', 'ASC']]})
         }
     }
 
@@ -340,10 +340,11 @@ export class ApiService {
         if(withObligations) {
             return await this.assetRepository.findAll({
                 where: {userAddress: userAddress.toLowerCase()}, 
-                include: [Obligation]
+                include: [Obligation],
+                order: [['id', 'ASC']]
             })
         } else {
-            return await this.assetRepository.findAll({where: {userAddress: userAddress.toLowerCase()}})
+            return await this.assetRepository.findAll({where: {userAddress: userAddress.toLowerCase()}, order: [['id', 'ASC']]})
         }
     }
 

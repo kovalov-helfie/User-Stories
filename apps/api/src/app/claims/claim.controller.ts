@@ -114,24 +114,24 @@ export class ClaimController {
         });
     }
 
-    @Get('/claim/docgen/:userAddress-:claimTopic')
+    @Get('/claim/docgen/:senderAddress/:userAddress-:claimTopic')
     @ApiResponse({ status: 200, description: 'claim by claimUserKey', type: Claim })
     @ApiOperation({ summary: "retrieve claim by claimUserKey" })
     @ApiHeader({
         name: 'signature',
         description: 'user signature',
     })
+    @ApiParam({ name: 'senderAddress', required: true, description: 'eth sender address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f' })
     @ApiParam({ name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f' })
     @ApiParam({ name: 'claimTopic', required: true, description: 'claim topic', type: Number, example: 0 })
-    async getDocgen(@Headers() headers, @Param('userAddress') userAddress: string, @Param('claimTopic') claimTopic: string): Promise<StreamableFile> {
+    async getDocgen(@Headers() headers, @Param('senderAddress') senderAddress: string, @Param('userAddress') userAddress: string, @Param('claimTopic') claimTopic: string): Promise<StreamableFile> {
         const signature = headers['signature']
         if (!(await this.apiService.isUserExists({ userAddress: userAddress }))) {
             throw new BadRequestException(`User [${userAddress}] does not exist`)
         } else if (!(await this.apiService.findClaimById({ userAddress: userAddress, claimTopic: Number(claimTopic) }))) {
             throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
-        } 
-        else if(!(await this.apiService.isUserAdmin({ userAddress: userAddress }))) {
-            if (!(await this.signatureService.verifySignature('getDocgen', signature, userAddress))) {
+        } else if(!(await this.apiService.isUserAdmin({ userAddress: senderAddress }))) {
+            if (!(await this.signatureService.verifySignature('getDocgen', signature, senderAddress))) {
                 throw new UnauthorizedException(`User [${userAddress}] not authorized`)
             }
         }
