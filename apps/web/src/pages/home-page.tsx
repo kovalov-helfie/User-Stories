@@ -61,6 +61,7 @@ export const HomePage = () => {
                                                         claimTopic: element?.claimTopic,
                                                         docgen: inputEditDoc,
                                                     })
+                                                    setInputEditDoc(null)
                                                 }}>
                                                     Edit Claim Topic
                                                 </Button>

@@ -53,8 +53,8 @@ export const AdminClaimPage = () => {
                                                 !element?.user.isVerified
                                                     ?
                                                     <Button colorScheme={!element?.isClaimVerified ? "green" : "red"} size='sm'
-                                                        isDisabled={element?.user.isVerified} onClick={() => {
-                                                            if (!element?.user.isVerified) {
+                                                        isDisabled={element?.user.isVerified || element?.user?.identityAddress !== null} onClick={() => {
+                                                            if (!element?.user.isVerified || element?.user?.identityAddress !== null) {
                                                                 mutation.mutate({
                                                                     senderAddress: address?.toString(),
                                                                     userAddress: element?.userAddress,

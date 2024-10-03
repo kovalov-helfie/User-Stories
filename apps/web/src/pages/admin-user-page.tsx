@@ -54,11 +54,16 @@ export const AdminUserPage = () => {
                                     </Td>
                                     <Td>
                                         {
-                                            <Button colorScheme={element?.isVerified ? 'red' : 'green'} size='sm' onClick={() => verifyUserClaim.mutate({
-                                                senderAddress: address?.toString(),
-                                                userAddress: element?.userAddress,
-                                                verify: element?.isVerified ? false : true
-                                            })}>
+                                            <Button colorScheme={element?.isVerified ? 'red' : 'green'} size='sm' 
+                                            onClick={() => {
+                                                if(element?.identityAddress) {
+                                                    verifyUserClaim.mutate({
+                                                        senderAddress: address?.toString(),
+                                                        userAddress: element?.userAddress,
+                                                        verify: element?.isVerified ? false : true
+                                                    })
+                                                }
+                                            }}>
                                                 {element?.isVerified ? 'Unverify' : 'Verify'}
                                             </Button>
                                         }
