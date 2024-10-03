@@ -45,7 +45,7 @@ export const HomePage = () => {
                                 <Td>{element?.userAddress}</Td>
                                 <Td isNumeric>{element?.claimTopic}</Td>
                                 <Td w={'25%'} justifyContent={'center'} justifyItems={'center'}>
-                                    <HeaderImage claimTopic={element?.claimTopic} />
+                                    <HeaderImage claimTopic={element?.claimTopic} randomStr={element?.randomStr}/>
                                 </Td>
                                 <Td>
                                     <Checkbox isChecked={element?.isClaimVerified} disabled></Checkbox>
