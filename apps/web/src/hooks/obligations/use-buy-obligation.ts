@@ -44,7 +44,7 @@ export const useBuyObligation = () => {
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['obligations', 'true', 'false'] })
+      queryClient.invalidateQueries({ queryKey: ['obligations'] })
     },
   })
 

@@ -437,7 +437,8 @@ export class ApiService {
                     userAddress: userAddress,
                     lockupPeriod: lockupPeriod, 
                     minPurchaseAmount: minPurchaseAmount, 
-                    transferRestrictionAddress: transferRestrictionAddress
+                    transferRestrictionAddress: transferRestrictionAddress,
+                    isExecuted: false
                 }, 
                 {where : {id: obligationId, }, returning: true}
             )

@@ -33,7 +33,7 @@ export const useVerifyUserClaim = () => {
       })
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['claims' ,'true'] })
+      queryClient.invalidateQueries({ queryKey: ['claims'] })
     },
   })
 
