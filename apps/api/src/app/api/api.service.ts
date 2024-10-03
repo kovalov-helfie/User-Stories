@@ -143,6 +143,7 @@ interface UpdateObligationParams {
 
 interface ExecuteObligationParams {
     obligationId: number;
+    userAddress: string;
     isExecuted: boolean;
 }
 
@@ -445,9 +446,9 @@ export class ApiService {
             return entity;
         }
     
-        async executeObligation({obligationId, isExecuted}:ExecuteObligationParams) {
+        async executeObligation({obligationId, userAddress, isExecuted}:ExecuteObligationParams) {
             const [rows, entity] = await this.obligationRepository.update(
-                {isExecuted: isExecuted}, 
+                {userAddress: userAddress.toLowerCase(), isExecuted: isExecuted}, 
                 {where : {id: obligationId, }, returning: true}
             )
             return entity;
@@ -483,9 +484,9 @@ export class ApiService {
             if(obligation) {
                 if(obligation.isExecuted) {
                     if(obligation.userAddress !== userAddress.toLowerCase()) {
-                        const date = obligation.createdAt
-                        date.setSeconds(date.getSeconds() + obligation.lockupPeriod)
-                        if(Date.now() >= date) {
+                        const date = obligation.updatedAt.getTime()
+                        const newDate = new Date(date + obligation.lockupPeriod * 1000)
+                        if(Date.now() >= newDate.getTime()) {
                             return true
                         }
                     }
@@ -510,9 +511,9 @@ export class ApiService {
             if(obligation) {
                 if(obligation.isExecuted) {
                     if(obligation.userAddress === userAddress.toLowerCase()) {
-                        const date = obligation.createdAt
-                        date.setSeconds(date.getSeconds() + obligation.lockupPeriod)
-                        if(Date.now() >= date) {
+                        const date = obligation.updatedAt.getTime()
+                        const newDate = new Date(date + obligation.lockupPeriod * 1000)
+                        if(Date.now() >= newDate.getTime()) {
                             return true
                         }
                     }

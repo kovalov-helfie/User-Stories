@@ -98,9 +98,11 @@ export class ObligationController {
                 throw new BadRequestException(`Not Asset Obligation [${dto.obligationId}] owner [${dto.userAddress}]`)
             } else if(!(await this.apiService.isAvailableToUpdateObligation({obligationId: dto.obligationId, userAddress: dto.userAddress}))) {
                 const obligation = await this.apiService.findObligationById({obligationId: dto.obligationId})
-                const date = obligation.createdAt 
-                date.setSeconds(date.getSeconds() + obligation.lockupPeriod)
-                throw new BadRequestException(`Obligation [${dto.obligationId}] is locked till ${date}`)
+                const date = obligation.updatedAt.getTime()
+                const newDate = new Date(date + obligation.lockupPeriod * 1000)
+                if(Date.now() < newDate.getTime()) {
+                    throw new BadRequestException(`Obligation [${dto.obligationId}] is locked till ${date}`)
+                }
             }
         }
         return await this.apiService.updateObligation({
@@ -139,6 +141,7 @@ export class ObligationController {
 
         return await this.apiService.executeObligation({
             obligationId: dto.obligationId,
+            userAddress: dto.userAddress,
             isExecuted: true,
         });
     }
@@ -167,9 +170,11 @@ export class ObligationController {
                 throw new BadRequestException(`Not Asset Obligation [${dto.obligationId}] owner [${dto.userAddress}]`)
             } else if(!(await this.apiService.isAvailableToUpdateObligation({obligationId: dto.obligationId, userAddress: dto.userAddress}))) {
                 const obligation = await this.apiService.findObligationById({obligationId: dto.obligationId})
-                const date = obligation.createdAt 
-                date.setSeconds(date.getSeconds() + obligation.lockupPeriod)
-                throw new BadRequestException(`Obligation [${dto.obligationId}] is locked till ${date}`)
+                const date = obligation.updatedAt.getTime()
+                const newDate = new Date(date + obligation.lockupPeriod * 1000)
+                if(Date.now() < newDate.getTime()) {
+                    throw new BadRequestException(`Obligation [${dto.obligationId}] is locked till ${date}`)
+                }
             }
         }
         return await this.apiService.deleteObligation({
