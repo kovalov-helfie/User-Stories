@@ -9,6 +9,7 @@ import { useCreateAsset } from "../hooks/assets/use-create-asset";
 import { HeaderComponent } from "../components/header-component";
 import { useDeleteObligation } from "../hooks/obligations/use-delete-obligation";
 import { zeroAddress } from "viem";
+import { useBcMintAsset } from "../hooks/assets/use-bc-mint-asset";
 
 export const AssetPage = () => {
     const { isOpen, onOpen, onClose, } = useDisclosure();
@@ -24,6 +25,7 @@ export const AssetPage = () => {
 
     const createAssetMutation = useCreateAsset();
     const deleteObligationMutation = useDeleteObligation();
+    const useBcMint = useBcMintAsset();
 
     return <Container maxW={'8xl'} w={'100%'}>
         <HeaderComponent userData={userData} />
@@ -92,15 +94,16 @@ export const AssetPage = () => {
                         <Input placeholder='Type' value={inputType} onChange={(e) => setInputType(e.target.value)} />
 
                         <Button colorScheme='blue' onClick={() => {
-                            setInputName('')
-                            setInputType('')
-                            setInputDescription('')
                             createAssetMutation.mutate({
                                 userAddress: address?.toString(),
                                 name: inputName,
                                 description: inputDescription,
                                 type: inputType,
                             })
+                            setInputName('')
+                            setInputType('')
+                            setInputDescription('')
+                            useBcMint.mutate({userAddress:address?.toString()})
                         }}
                         >
                             Mint Asset
