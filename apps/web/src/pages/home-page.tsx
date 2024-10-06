@@ -9,7 +9,7 @@ import { useReducer, useState } from "react"
 import { HeaderComponent } from "../components/header-component"
 import { HeaderImage } from "../components/image-component"
 import { useEditUserClaim } from "../hooks/claims/use-edit-user-claim"
-import { useGetClaimTopics } from "../hooks/claims/use-get-claim-topics"
+import { useGetClaimTopics } from "../hooks/claims/use-bc-get-claim-topics"
 
 export const HomePage = () => {
     const { address } = useAccount()
