@@ -6,6 +6,8 @@ import { useGetUsers } from "../hooks/users/use-get-users"
 import { HeaderComponent } from "../components/header-component"
 import { useCreateIdentity } from "../hooks/identities/use-create-identity"
 import { useVerifyUser } from "../hooks/users/use-verify-user"
+import { useAddOperator } from "../hooks/users/use-bc-add-operator"
+import { useRemoveOperator } from "../hooks/users/use-bc-remove-operator"
 
 export const AdminUserPage = () => {
     const { address } = useAccount()
@@ -14,6 +16,8 @@ export const AdminUserPage = () => {
 
     const deployIdentityMutation = useCreateIdentity()
     const verifyUserClaim = useVerifyUser()
+    const useAddUser = useAddOperator()
+    const useRemoveUser = useRemoveOperator()
 
     return <Container maxW={'8xl'} w={'100%'}>
         <HeaderComponent userData={userData} />
@@ -62,6 +66,11 @@ export const AdminUserPage = () => {
                                                         userAddress: element?.userAddress,
                                                         verify: element?.isVerified ? false : true
                                                     })
+                                                    if(element?.isVerified) {
+                                                        useRemoveUser.mutate({userAddress: element?.userAddress})
+                                                    }  else {
+                                                        useAddUser.mutate({userAddress: element?.userAddress})
+                                                    }
                                                 }
                                             }}>
                                                 {element?.isVerified ? 'Unverify' : 'Verify'}
