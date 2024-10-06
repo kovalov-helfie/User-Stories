@@ -1,4 +1,4 @@
-import { Button, Checkbox, Input, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex } from "@chakra-ui/react"
+import { Button, Checkbox, Input, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex, Select } from "@chakra-ui/react"
 import { env } from "../env"
 import { useAccount } from "wagmi"
 import { useGetUser } from "../hooks/users/use-get-user"
@@ -9,13 +9,15 @@ import { useReducer, useState } from "react"
 import { HeaderComponent } from "../components/header-component"
 import { HeaderImage } from "../components/image-component"
 import { useEditUserClaim } from "../hooks/claims/use-edit-user-claim"
+import { useGetClaimTopics } from "../hooks/claims/use-get-claim-topics"
 
 export const HomePage = () => {
     const { address } = useAccount()
     const { isLoadingUser, userData } = useGetUser(address?.toString())
     const { isPendingUserClaims, userClaimsData } = useGetUserClaims(address?.toString())
+    const { claimTopicsData } = useGetClaimTopics()
 
-    const [inputClaimTopic, setInputClaimTopic] = useState('');
+    const [inputClaimTopic, setClaimTopic] = useState('');
     const [inputDoc, setInputDoc] = useState<File | null>(null);
     const [inputEditDoc, setInputEditDoc] = useState<File | null>(null);
 
@@ -45,7 +47,7 @@ export const HomePage = () => {
                                 <Td>{element?.userAddress}</Td>
                                 <Td isNumeric>{element?.claimTopic}</Td>
                                 <Td w={'25%'} justifyContent={'center'} justifyItems={'center'}>
-                                    <HeaderImage claimTopic={element?.claimTopic} randomStr={element?.randomStr}/>
+                                    <HeaderImage claimTopic={element?.claimTopic} randomStr={element?.randomStr} />
                                 </Td>
                                 <Td>
                                     <Checkbox isChecked={element?.isClaimVerified} disabled></Checkbox>
@@ -79,16 +81,32 @@ export const HomePage = () => {
 
         <Flex w={'100%'} justifyContent={'center'} margin={'30px'}>
             <Stack spacing={3} w={'100%'} maxW={'2xl'}>
-                <Input placeholder='Claim Topic' value={inputClaimTopic} onChange={(e) => setInputClaimTopic(e.target.value)} />
+                <Select placeholder='Claim Topic' onChange={(e) => {
+                    if (e.target.value !== '') {
+                        setClaimTopic(e.target.value)
+                    }
+                }}>
+                    {
+                        claimTopicsData.map((element: any) => {
+                            return (
+                                <option value={element}>
+                                    {element}
+                                </option>
+                            )
+                        })
+                    }
+                </Select>
                 <Input placeholder='Document' type="file" onChange={(e) => { if (e.target.files) { setInputDoc(e.target.files[0]); } }} />
-                <Button colorScheme='blue' onClick={() => {
-                    mutation.mutate({
-                        userAddress: address?.toString(),
-                        claimTopic: inputClaimTopic,
-                        docgen: inputDoc,
-                    })
-                    setInputClaimTopic('')
-                    setInputDoc(null)
+                <Button colorScheme='blue' isDisabled={userData?.isVerified && inputClaimTopic !== ''} onClick={() => {
+                    if (!userData?.isVerified && inputClaimTopic !== '') {
+                        mutation.mutate({
+                            userAddress: address?.toString(),
+                            claimTopic: inputClaimTopic,
+                            docgen: inputDoc,
+                        })
+                        setClaimTopic('')
+                        setInputDoc(null)
+                    }
                 }}>
                     Add Claim Topic
                 </Button>
