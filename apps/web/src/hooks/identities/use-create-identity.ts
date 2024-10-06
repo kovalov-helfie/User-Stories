@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { env } from '../../env'
 import { useSignMessage } from 'wagmi'
 import { verifyMessage } from "../../functions"
+import { useGetUserIdentity } from './use-bc-get-identity'
 
 export const useCreateIdentity = () => { 
   const queryClient = useQueryClient()
@@ -16,7 +17,8 @@ export const useCreateIdentity = () => {
         throw new Error("No User")
       }
 
-      const identityAddress = variables.userAddress
+      const identityAddress = useGetUserIdentity(variables.userAddress)
+
       const addIdentitySignature = await signMessageAsync({message: verifyMessage(variables.senderAddress, 'createIdentity')})
       const addIdentity = await fetch(`${env.VITE_API_URL}/identities/add-identity`, { 
         method: 'POST', 

@@ -8,6 +8,7 @@ import { useCreateIdentity } from "../hooks/identities/use-create-identity"
 import { useVerifyUser } from "../hooks/users/use-verify-user"
 import { useAddOperator } from "../hooks/users/use-bc-add-operator"
 import { useRemoveOperator } from "../hooks/users/use-bc-remove-operator"
+import { useDeployIdentity } from "../hooks/identities/use-bc-deploy-identity"
 
 export const AdminUserPage = () => {
     const { address } = useAccount()
@@ -18,6 +19,7 @@ export const AdminUserPage = () => {
     const verifyUserClaim = useVerifyUser()
     const useAddUser = useAddOperator()
     const useRemoveUser = useRemoveOperator()
+    const deployIdentity = useDeployIdentity()
 
     return <Container maxW={'8xl'} w={'100%'}>
         <HeaderComponent userData={userData} />
@@ -38,7 +40,7 @@ export const AdminUserPage = () => {
                     <Tbody>
                         {usersData?.map((element: any) => {
                             return (
-                                <Tr key={`${element.id}`}>
+                                <Tr key={`${element?.id}`}>
                                     <Td>
                                         <Stack direction={"row"}>
                                             <Text>{element?.userAddress}</Text >
@@ -47,10 +49,17 @@ export const AdminUserPage = () => {
                                     <Td>{
                                         !element?.identityAddress
                                             ?
-                                            <Button colorScheme='blue' size='sm' onClick={() => deployIdentityMutation.mutate({
-                                                senderAddress: address?.toString(),
-                                                userAddress: element?.userAddress
-                                            })}>
+                                            <Button colorScheme='blue' size='sm' onClick={() => {
+                                                if(!element?.identityAddress) {
+                                                    deployIdentity.mutate({
+                                                        userAddress: element?.userAddress
+                                                    })
+                                                    deployIdentityMutation.mutate({
+                                                        senderAddress: address?.toString(),
+                                                        userAddress: element?.userAddress
+                                                    })
+                                                }
+                                            }}>
                                                 Deploy Identity
                                             </Button>
                                             : element?.identityAddress
