@@ -6,7 +6,8 @@ import { useGetClaims } from "../hooks/claims/use-get-claims"
 import { env } from "../env"
 import { useVerifyUserClaim } from "../hooks/claims/use-verify-user-claim"
 import { HeaderComponent } from "../components/header-component"
-import { useState } from "react"
+import { useBcCreateClaim } from "../hooks/claims/use-bc-create-claim-topics"
+import { useBcRemoveClaim } from "../hooks/claims/use-bc-remove-claim-topics"
 
 export const AdminClaimPage = () => {
     const { address } = useAccount()
@@ -14,6 +15,8 @@ export const AdminClaimPage = () => {
     const { isPendingClaims, claimsData } = useGetClaims('true')
 
     const mutation = useVerifyUserClaim()
+    const addClaim = useBcCreateClaim()
+    const removeClaim = useBcRemoveClaim()
 
     return <Container maxW={'8xl'} w={'100%'}>
         <HeaderComponent userData={userData} />
@@ -58,9 +61,23 @@ export const AdminClaimPage = () => {
                                                                 mutation.mutate({
                                                                     senderAddress: address?.toString(),
                                                                     userAddress: element?.userAddress,
-                                                                    claimTopic: Number(element.claimTopic),
+                                                                    claimTopic: Number(element?.claimTopic),
                                                                     verify: !element?.isClaimVerified
                                                                 })
+                                                                if (!element?.isClaimVerified) {
+                                                                    addClaim.mutate({
+                                                                        senderAddress: address?.toString(),
+                                                                        userAddress: element?.userAddress,
+                                                                        identityAddress: element?.user?.identityAddress,
+                                                                        claimTopic: BigInt(element?.claimTopic)
+                                                                    })
+                                                                } else {
+                                                                    removeClaim.mutate({
+                                                                        userAddress: address?.toString(),
+                                                                        identityAddress: element?.user?.identityAddress,
+                                                                        claimTopic: BigInt(element?.claimTopic)
+                                                                    })
+                                                                }
                                                             }
                                                         }}>
                                                         {!element?.isClaimVerified ? "Verify" : "Unverify"}
