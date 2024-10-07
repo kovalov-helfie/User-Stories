@@ -23,6 +23,12 @@ interface SetIdentityParams {
 interface VerifyUserParams {
     userAddress: string;
     verify: boolean;
+    country: number;
+}
+
+interface VerifyAdminParams {
+    userAddress: string;
+    verify: boolean;
 }
 ///
 
@@ -197,15 +203,15 @@ export class ApiService {
         return entity
     }
 
-    async verifyUser({userAddress, verify}:VerifyUserParams) {
+    async verifyUser({userAddress, verify, country}:VerifyUserParams) {
         const [rows, entity] = await this.userRepository.update(
-            {isVerified: verify}, 
+            {isVerified: verify, country: country}, 
             {where : {userAddress: userAddress.toLowerCase()}, returning: true}
         )
         return entity
     }
 
-    async verifyAdmin({userAddress, verify}:VerifyUserParams) {
+    async verifyAdmin({userAddress, verify}:VerifyAdminParams) {
         const [rows, entity] = await this.userRepository.update(
             {isAdmin: verify}, 
             {where : {userAddress: userAddress.toLowerCase()}, returning: true}

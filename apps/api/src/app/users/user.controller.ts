@@ -80,7 +80,7 @@ export class UserController {
             }
         }
 
-        return await this.apiService.verifyUser({userAddress: dto.userAddress, verify: dto.verify});
+        return await this.apiService.verifyUser({userAddress: dto.userAddress, verify: dto.verify, country: dto.country});
     }
 
     @Patch('/verify-admin')

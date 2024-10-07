@@ -14,6 +14,9 @@ export class User extends Model<User> {
     @Column({type: DataType.STRING, allowNull: true})
     @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
     identityAddress: string;
+    @Column({type: DataType.SMALLINT, allowNull: true})
+    @ApiProperty({type: Number, example: 0})
+    country: number;
     @Column({type: DataType.BOOLEAN, allowNull: false, defaultValue: false})
     @ApiProperty({type: Boolean, example: false})
     isVerified: boolean;

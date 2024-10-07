@@ -12,7 +12,8 @@ export const useVerifyUser = () => {
       variables: { 
         senderAddress: string | undefined,
         userAddress: string | undefined, 
-        verify: boolean} ) => {
+        verify: boolean,
+        country: number | undefined} ) => {
       if(!variables.senderAddress) {
         throw new Error("No User")
       }
@@ -24,6 +25,7 @@ export const useVerifyUser = () => {
             senderAddress: variables.senderAddress, 
             userAddress: variables.userAddress,
             verify: variables.verify,
+            country: variables.country,
             signature: verifySignature},),
         headers: {
           'Content-Type': 'application/json'
