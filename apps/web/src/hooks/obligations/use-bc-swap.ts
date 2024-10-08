@@ -29,12 +29,13 @@ export const useBcSwap = () => {
                     parseUnits(MAX_AMOUNT, 6),
                     path,
                     variables.userAddress as Address,
-                    BigInt(0)
+                    BigInt(Math.floor(Date.now() / 1000) + 40)
                 ],
             })
             await publicClient?.waitForTransactionReceipt({hash: wc})
           } catch (error) {
             console.error(error)
+            throw error
           }
         },
         onSuccess: () => {

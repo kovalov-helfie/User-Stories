@@ -93,8 +93,9 @@ export const AssetPage = () => {
                         <Input placeholder='Description' value={inputDescription} onChange={(e) => setInputDescription(e.target.value)} />
                         <Input placeholder='Type' value={inputType} onChange={(e) => setInputType(e.target.value)} />
 
-                        <Button colorScheme='blue' onClick={() => {
-                            createAssetMutation.mutate({
+                        <Button colorScheme='blue' onClick={async () => {
+                            await useBcMint.mutateAsync({ userAddress: address?.toString() })
+                            await createAssetMutation.mutateAsync({
                                 userAddress: address?.toString(),
                                 name: inputName,
                                 description: inputDescription,
@@ -103,7 +104,6 @@ export const AssetPage = () => {
                             setInputName('')
                             setInputType('')
                             setInputDescription('')
-                            useBcMint.mutate({userAddress:address?.toString()})
                         }}
                         >
                             Mint Asset

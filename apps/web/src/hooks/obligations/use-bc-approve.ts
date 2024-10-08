@@ -1,10 +1,9 @@
 import { usePublicClient, useWriteContract } from 'wagmi'
 import { parseUnits, Address } from 'viem'
-import { TOKEN, UNI_TEST_TOKEN0 } from '../../addresses'
+import { UNI_TEST_TOKEN0 } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { TOKEN_ABI } from '../../abis/token.abi'
-
-const MAX_AMOUNT = '100000'
+import { MAX_AMOUNT } from '../../constants'
 
 export const useBcApprove = () => {
     const queryClient = useQueryClient()
@@ -32,6 +31,7 @@ export const useBcApprove = () => {
             await publicClient?.waitForTransactionReceipt({hash: wc})
           } catch (error) {
             console.error(error)
+            throw error
           }
         },
         onSuccess: () => {

@@ -46,16 +46,16 @@ export const MarketPage = () => {
                                 <Td>{element?.asset?.type}</Td>
                                 <Td>{element?.minPurchaseAmount}</Td>
                                 <Td>
-                                    <Button colorScheme='yellow' size='sm' onClick={() => {
+                                    <Button colorScheme='yellow' size='sm' onClick={async () => {
                                         if(userData?.isVerified && element?.userAddress.toLowerCase() !== userData?.userAddress?.toLowerCase()) {
-                                            buyMutation.mutate({
+                                            await approve.mutateAsync({userAddress: userData?.userAddress,})
+                                            await swap.mutateAsync({userAddress: userData?.userAddress,})
+                                            await buyMutation.mutateAsync({
                                                 assetId: element?.asset?.id,
                                                 userAddress: userData?.userAddress,
                                                 minPurchaseAmount: element?.minPurchaseAmount,
                                                 obligationId: element?.id
                                             })
-                                            approve.mutate({userAddress: userData?.userAddress,})
-                                            swap.mutate({userAddress: userData?.userAddress,})
                                         }
                                         }} isDisabled={!userData?.isVerified || element?.userAddress.toLowerCase() === userData?.userAddress?.toLowerCase()}>
                                             Buy
