@@ -13,6 +13,7 @@ import { useState } from "react"
 import { useRegisterIdentity } from "../hooks/identities/use-bc-register-identity"
 import { useDeleteIdentity } from "../hooks/identities/use-bc-delete-identity"
 import { useBcIdentityAddKey } from "../hooks/identities/use-bc-identity-add-key"
+import { InputCountry } from "../components/country-component"
 
 export const AdminUserPage = () => {
     const { address } = useAccount()
@@ -94,29 +95,29 @@ export const AdminUserPage = () => {
                                             <Stack direction={"column"}>
                                                 {
                                                     !element?.country || !element?.isVerified
-                                                        ? <Input placeholder='Country' value={inputCountry} onChange={(e) => setInputCountry(e.target.value)} />
+                                                        ? <InputCountry country={element?.country ?? '0'}/>
                                                         : <></>
                                                 }
                                                 <Button isDisabled={!element?.identityAddress} colorScheme={element?.isVerified ? 'red' : 'green'} size='sm'
                                                     onClick={async () => {
                                                         if (element?.identityAddress) {
+                                                            if (element?.isVerified) {
+                                                                await deleteIdentity.mutateAsync({ userAddress: element?.userAddress })
+                                                                await useRemoveUser.mutateAsync({ userAddress: element?.userAddress })
+                                                            } else {
+                                                                await registerIdentity.mutateAsync({
+                                                                    userAddress: element?.userAddress,
+                                                                    identityAddress: element?.identityAddress,
+                                                                    country: Number(inputCountry),
+                                                                })
+                                                                await useAddUser.mutateAsync({ userAddress: element?.userAddress })
+                                                            }
                                                             await verifyUserClaim.mutateAsync({
                                                                 senderAddress: address?.toString(),
                                                                 userAddress: element?.userAddress,
                                                                 country: Number(inputCountry),
                                                                 verify: element?.isVerified ? false : true,
                                                             })
-                                                            if (element?.isVerified) {
-                                                                await useRemoveUser.mutateAsync({ userAddress: element?.userAddress })
-                                                                await deleteIdentity.mutateAsync({ userAddress: element?.userAddress })
-                                                            } else {
-                                                                await useAddUser.mutateAsync({ userAddress: element?.userAddress })
-                                                                await registerIdentity.mutateAsync({
-                                                                    userAddress: element?.userAddress,
-                                                                    identityAddress: element?.identityAddress,
-                                                                    country: Number(inputCountry),
-                                                                })
-                                                            }
                                                         }
                                                     }}>
                                                     {element?.isVerified ? 'Unverify' : 'Verify'}
