@@ -32,9 +32,7 @@ export const HeaderImage = ({ claimTopic, randomStr }: { claimTopic: number, ran
                 }
 
                 const blob = await response.blob();
-                console.warn(blob)
                 objectUrl = URL.createObjectURL(blob);
-                console.warn(objectUrl)
 
                 if (isMounted) {
                     setImageUrl(objectUrl);
