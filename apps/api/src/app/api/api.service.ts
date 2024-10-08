@@ -197,7 +197,7 @@ export class ApiService {
 
     async setIdentity({userAddress, identityAddress}:SetIdentityParams) {
         const [rows, entity] = await this.userRepository.update(
-            {identityAddress: identityAddress}, 
+            {identityAddress: identityAddress.toLowerCase()}, 
             {where : {userAddress: userAddress.toLowerCase()}, returning: true}
         )
         return entity
@@ -376,7 +376,7 @@ export class ApiService {
 
     async updateUserAsset({assetId, userAddress}:UpdateAssetUserParams) {
         const [rows, entity] = await this.assetRepository.update(
-            {userAddress: userAddress}, 
+            {userAddress: userAddress.toLowerCase()}, 
             {where : {id: assetId, }, returning: true}
         )
         return entity;
@@ -441,10 +441,10 @@ export class ApiService {
         async updateObligation({obligationId, userAddress, lockupPeriod, minPurchaseAmount, transferRestrictionAddress}:UpdateObligationParams) {
             const [rows, entity] = await this.obligationRepository.update(
                 {
-                    userAddress: userAddress,
+                    userAddress: userAddress.toLowerCase(),
                     lockupPeriod: lockupPeriod, 
                     minPurchaseAmount: minPurchaseAmount, 
-                    transferRestrictionAddress: transferRestrictionAddress,
+                    transferRestrictionAddress: transferRestrictionAddress.toLowerCase(),
                     isExecuted: false
                 }, 
                 {where : {id: obligationId, }, returning: true}
