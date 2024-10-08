@@ -1,11 +1,12 @@
 import { useWriteContract } from 'wagmi'
-import { TOKEN_ABI } from '../../abis/token.abi'
 import { parseUnits } from 'viem'
-import { TOKEN } from '../../addresses'
+import { TEST_USDT, TOKEN, UNI_TEST_TOKEN0 } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { MINT_AMOUNT } from '../../constants'
+import { TOKEN_ABI } from '../../abis/token.abi'
 
-export const useBcMintAsset = () => {
+const MAX_AMOUNT = '100000'
+
+export const useBcApprove = () => {
     const queryClient = useQueryClient()
     const { writeContractAsync } = useWriteContract()
 
@@ -17,16 +18,15 @@ export const useBcMintAsset = () => {
           if(!variables.userAddress) {
             throw new Error("No User")
           }
-    
+          const path = [TEST_USDT, TOKEN]
           try {
             const wc = await writeContractAsync({
                 abi: TOKEN_ABI,
-                address: TOKEN,
-                functionName: 'mint',
+                address: UNI_TEST_TOKEN0,
+                functionName: 'approve',
                 args: [
                     variables.userAddress,
-                    parseUnits(MINT_AMOUNT, 18),
-                    true
+                    parseUnits(MAX_AMOUNT, 6),
                 ],
             })
           } catch (error) {
@@ -34,7 +34,7 @@ export const useBcMintAsset = () => {
           }
         },
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['userAssets'] })
+          queryClient.invalidateQueries({ queryKey: ['obligations'] })
         },
       })
     

@@ -1,11 +1,11 @@
 import { useWriteContract } from 'wagmi'
-import { TOKEN_ABI } from '../../abis/token.abi'
 import { parseUnits } from 'viem'
-import { TOKEN } from '../../addresses'
+import { UNI_TEST_TOKEN0, TOKEN, UNI_ROUTER } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { MINT_AMOUNT } from '../../constants'
+import { UNI_ROUTER_ABI } from '../../abis/router.abi'
+import { MAX_AMOUNT, MINT_AMOUNT } from '../../constants'
 
-export const useBcMintAsset = () => {
+export const useBcSwap = () => {
     const queryClient = useQueryClient()
     const { writeContractAsync } = useWriteContract()
 
@@ -17,16 +17,18 @@ export const useBcMintAsset = () => {
           if(!variables.userAddress) {
             throw new Error("No User")
           }
-    
+          const path = [UNI_TEST_TOKEN0, TOKEN]
           try {
             const wc = await writeContractAsync({
-                abi: TOKEN_ABI,
-                address: TOKEN,
-                functionName: 'mint',
+                abi: UNI_ROUTER_ABI,
+                address: UNI_ROUTER,
+                functionName: 'swapTokensForExactTokens',
                 args: [
-                    variables.userAddress,
                     parseUnits(MINT_AMOUNT, 18),
-                    true
+                    parseUnits(MAX_AMOUNT, 6),
+                    path,
+                    variables.userAddress,
+                    0
                 ],
             })
           } catch (error) {
@@ -34,7 +36,7 @@ export const useBcMintAsset = () => {
           }
         },
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ['userAssets'] })
+          queryClient.invalidateQueries({ queryKey: ['obligations'] })
         },
       })
     

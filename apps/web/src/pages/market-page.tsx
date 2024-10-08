@@ -5,6 +5,8 @@ import { useAccount } from "wagmi"
 import { useGetUser } from "../hooks/users/use-get-user"
 import { useGetObligations } from "../hooks/obligations/use-get-obligations"
 import { useBuyObligation } from "../hooks/obligations/use-buy-obligation"
+import { useBcApprove } from "../hooks/obligations/use-bc-approve"
+import { useBcSwap } from "../hooks/obligations/use-bc-swap"
 
 export const MarketPage = () => {
     const { address } = useAccount()
@@ -12,6 +14,8 @@ export const MarketPage = () => {
     const { isPendingObligations, obligationsData } = useGetObligations('true', null)
 
     const buyMutation = useBuyObligation()
+    const approve = useBcApprove()
+    const swap = useBcSwap()
 
     return <Container maxW={'8xl'} w={'100%'}>
         <HeaderComponent userData={userData} />
@@ -50,6 +54,8 @@ export const MarketPage = () => {
                                                 minPurchaseAmount: element?.minPurchaseAmount,
                                                 obligationId: element?.id
                                             })
+                                            approve.mutate({userAddress: userData?.userAddress,})
+                                            swap.mutate({userAddress: userData?.userAddress,})
                                         }
                                         }} isDisabled={!userData?.isVerified || element?.userAddress.toLowerCase() === userData?.userAddress?.toLowerCase()}>
                                             Buy
