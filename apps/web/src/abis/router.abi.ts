@@ -1,6 +1,4 @@
-import { Abi } from "viem";
-
-export const UNI_ROUTER_ABI: Abi = [
+export const UNI_ROUTER_ABI = [
     {
         "inputs": [
             {
@@ -972,4 +970,4 @@ export const UNI_ROUTER_ABI: Abi = [
         "stateMutability": "payable",
         "type": "receive"
     }
-]
+] as const

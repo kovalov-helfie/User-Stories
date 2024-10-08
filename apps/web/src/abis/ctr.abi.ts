@@ -1,6 +1,4 @@
-import { Abi } from "viem";
-
-export const CTR_ABI: Abi = [
+export const CTR_ABI = [
     {
         "inputs": [],
         "stateMutability": "nonpayable",
@@ -294,4 +292,4 @@ export const CTR_ABI: Abi = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]
+] as const

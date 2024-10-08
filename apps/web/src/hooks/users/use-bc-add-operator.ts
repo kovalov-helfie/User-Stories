@@ -2,6 +2,7 @@ import { useWriteContract } from 'wagmi'
 import { TIR_ABI } from '../../abis/tir.abi'
 import { TIR } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Address } from 'viem'
 
 export const useAddOperator = () => {
     const queryClient = useQueryClient()
@@ -22,7 +23,7 @@ export const useAddOperator = () => {
                     address: TIR,
                     functionName: 'addOperator',
                     args: [
-                        variables.userAddress,
+                        variables.userAddress as Address,
                     ],
                 })
             } catch (error) {

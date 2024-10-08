@@ -1,6 +1,4 @@
-import { Abi } from "viem";
-
-export const IR_ABI: Abi = [
+export const IR_ABI = [
     {
         "inputs": [],
         "stateMutability": "nonpayable",
@@ -498,4 +496,4 @@ export const IR_ABI: Abi = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]
+] as const

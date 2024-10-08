@@ -1,5 +1,5 @@
 import { useWriteContract } from 'wagmi'
-import { parseUnits } from 'viem'
+import { parseUnits, Address } from 'viem'
 import { UNI_TEST_TOKEN0, TOKEN, UNI_ROUTER } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { UNI_ROUTER_ABI } from '../../abis/router.abi'
@@ -17,7 +17,7 @@ export const useBcSwap = () => {
           if(!variables.userAddress) {
             throw new Error("No User")
           }
-          const path = [UNI_TEST_TOKEN0, TOKEN]
+          const path: Address[] = [UNI_TEST_TOKEN0, TOKEN]
           try {
             const wc = await writeContractAsync({
                 abi: UNI_ROUTER_ABI,
@@ -27,8 +27,8 @@ export const useBcSwap = () => {
                     parseUnits(MINT_AMOUNT, 18),
                     parseUnits(MAX_AMOUNT, 6),
                     path,
-                    variables.userAddress,
-                    0
+                    variables.userAddress as Address,
+                    BigInt(0)
                 ],
             })
           } catch (error) {

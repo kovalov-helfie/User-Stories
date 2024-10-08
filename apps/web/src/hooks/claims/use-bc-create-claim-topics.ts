@@ -40,7 +40,7 @@ export const useBcCreateClaim = () => {
           args: [
             variables.claimTopic,
             SCHEME,
-            variables.userAddress,
+            variables.userAddress as Address,
             signature,
             data,
             uri,

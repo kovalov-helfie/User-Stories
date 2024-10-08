@@ -1,6 +1,6 @@
 import { useWriteContract } from 'wagmi'
 import { TOKEN_ABI } from '../../abis/token.abi'
-import { parseUnits } from 'viem'
+import { parseUnits, Address } from 'viem'
 import { TOKEN } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { MINT_AMOUNT } from '../../constants'
@@ -24,7 +24,7 @@ export const useBcMintAsset = () => {
                 address: TOKEN,
                 functionName: 'mint',
                 args: [
-                    variables.userAddress,
+                    variables.userAddress as Address,
                     parseUnits(MINT_AMOUNT, 18),
                     true
                 ],

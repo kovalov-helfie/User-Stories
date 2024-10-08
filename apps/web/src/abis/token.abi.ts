@@ -1,6 +1,4 @@
-import { Abi } from "viem";
-
-export const TOKEN_ABI: Abi = [
+export const TOKEN_ABI = [
     {
         "inputs": [],
         "stateMutability": "nonpayable",
@@ -1155,4 +1153,4 @@ export const TOKEN_ABI: Abi = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]
+] as const

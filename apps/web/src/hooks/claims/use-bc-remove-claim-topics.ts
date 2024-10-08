@@ -1,10 +1,8 @@
 import { useSignMessage, useWriteContract } from 'wagmi'
-import { Address, parseUnits, zeroAddress } from 'viem'
+import { Address, parseUnits, zeroAddress, Hex } from 'viem'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IDENTITY_ABI } from '../../abis/identity.abi'
 import { claimSignature, generateClaimId } from '../../functions'
-
-const SCHEME = BigInt('1')
 
 // TODO: 1. claimTopics in bc, change dp with user country; 2. video; 3. Deployment
 export const useBcRemoveClaim = () => {
@@ -25,13 +23,13 @@ export const useBcRemoveClaim = () => {
       }
 
       try {
-        const claimId = generateClaimId(variables.userAddress as `0x${string}`, variables.claimTopic)
+        const claimId = generateClaimId(variables.userAddress as Address, variables.claimTopic)
         const wc = await writeContractAsync({
           abi: IDENTITY_ABI,
           address: variables.identityAddress as Address,
           functionName: 'removeClaim',
           args: [
-            claimId
+            claimId as Hex
           ],
         })
       } catch (error) {

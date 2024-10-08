@@ -2,6 +2,7 @@ import { useWriteContract } from 'wagmi'
 import { IR } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IR_ABI } from '../../abis/ir.abi'
+import { Address } from 'viem'
 
 export const useDeleteIdentity = () => {
     const queryClient = useQueryClient()
@@ -22,7 +23,7 @@ export const useDeleteIdentity = () => {
                     address: IR,
                     functionName: 'deleteIdentity',
                     args: [
-                        variables.userAddress
+                        variables.userAddress as Address
                     ],
                 })
             } catch (error) {
