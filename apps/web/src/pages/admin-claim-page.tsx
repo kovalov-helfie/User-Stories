@@ -38,7 +38,7 @@ export const AdminClaimPage = () => {
                         <Tbody>
                             {claimsData?.map((element: any) => {
                                 return (
-                                    <Tr key={`${element.id}`}>
+                                    <Tr key={`${element?.claimUserKey}`}>
                                         <Td>
                                             <Stack direction={"row"}>
                                                 <Text>{element?.userAddress}</Text>

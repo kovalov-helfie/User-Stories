@@ -1,6 +1,6 @@
 import { Abi } from "viem";
 
-export const ID_FACTORY_ABI: Abi = [
+export const ID_FACTORY_ABI = [
     {
         "anonymous": false,
         "inputs": [
@@ -339,4 +339,4 @@ export const ID_FACTORY_ABI: Abi = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-]
+] as const

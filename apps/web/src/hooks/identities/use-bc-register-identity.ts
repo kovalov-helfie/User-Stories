@@ -2,6 +2,7 @@ import { useWriteContract } from 'wagmi'
 import { IR } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IR_ABI } from '../../abis/ir.abi'
+import { Address } from 'viem'
 
 export const useRegisterIdentity = () => {
     const queryClient = useQueryClient()
@@ -12,7 +13,7 @@ export const useRegisterIdentity = () => {
             variables: {
                 userAddress: string | undefined,
                 identityAddress: string | undefined,
-                country: bigint,
+                country: number,
             }) => {
             if (!variables.userAddress) {
                 throw new Error("No User")
@@ -26,8 +27,8 @@ export const useRegisterIdentity = () => {
                     address: IR,
                     functionName: 'registerIdentity',
                     args: [
-                        variables.userAddress,
-                        variables.identityAddress,
+                        variables.userAddress as Address,
+                        variables.identityAddress  as Address,
                         variables.country,
                     ],
                 })

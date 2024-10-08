@@ -12,6 +12,7 @@ import { useDeployIdentity } from "../hooks/identities/use-bc-deploy-identity"
 import { useState } from "react"
 import { useRegisterIdentity } from "../hooks/identities/use-bc-register-identity"
 import { useDeleteIdentity } from "../hooks/identities/use-bc-delete-identity"
+import { useBcIdentityAddKey } from "../hooks/identities/use-bc-identity-add-key"
 
 export const AdminUserPage = () => {
     const { address } = useAccount()
@@ -20,12 +21,16 @@ export const AdminUserPage = () => {
 
     const [inputCountry, setInputCountry] = useState('');
 
-    const deployIdentityMutation = useCreateIdentity()
-    const verifyUserClaim = useVerifyUser()
-    const useAddUser = useAddOperator()
-    const useRemoveUser = useRemoveOperator()
     const deployIdentity = useDeployIdentity()
+    const addKey = useBcIdentityAddKey()
+    const createIdentity = useCreateIdentity()
+
+    const verifyUserClaim = useVerifyUser()
+
+    const useAddUser = useAddOperator()
     const registerIdentity = useRegisterIdentity()
+
+    const useRemoveUser = useRemoveOperator()
     const deleteIdentity = useDeleteIdentity()
 
     return <Container maxW={'8xl'} w={'100%'}>
@@ -48,7 +53,7 @@ export const AdminUserPage = () => {
                     <Tbody>
                         {usersData?.map((element: any) => {
                             return (
-                                <Tr key={`${element?.id}`}>
+                                <Tr key={`${element?.userAddress}`}>
                                     <Td>
                                         <Stack direction={"row"}>
                                             <Text>{element?.userAddress}</Text>
@@ -58,14 +63,19 @@ export const AdminUserPage = () => {
                                     <Td>{
                                         !element?.identityAddress
                                             ?
-                                            <Button colorScheme='blue' size='sm' onClick={() => {
+                                            <Button colorScheme='blue' size='sm' onClick={async () => {
                                                 if (!element?.identityAddress) {
-                                                    deployIdentity.mutate({
-                                                        userAddress: element?.userAddress
+                                                    await deployIdentity.mutateAsync({
+                                                        userAddress: element?.userAddress,
+                                                        senderAddress: address?.toString()
                                                     })
-                                                    deployIdentityMutation.mutate({
-                                                        senderAddress: address?.toString(),
-                                                        userAddress: element?.userAddress
+                                                    await addKey.mutateAsync({
+                                                        userAddress: element?.userAddress,
+                                                        senderAddress: address?.toString()
+                                                    })
+                                                    await createIdentity.mutateAsync({
+                                                        userAddress: element?.userAddress,
+                                                        senderAddress: address?.toString()
                                                     })
                                                 }
                                             }}>
@@ -84,28 +94,28 @@ export const AdminUserPage = () => {
                                             <Stack direction={"column"}>
                                                 {
                                                     !element?.country || !element?.isVerified
-                                                    ? <Input placeholder='Country' value={inputCountry} onChange={(e) => setInputCountry(e.target.value)} />
-                                                    :<></>
+                                                        ? <Input placeholder='Country' value={inputCountry} onChange={(e) => setInputCountry(e.target.value)} />
+                                                        : <></>
                                                 }
-                                                <Button colorScheme={element?.isVerified ? 'red' : 'green'} size='sm'
-                                                    onClick={() => {
+                                                <Button isDisabled={!element?.identityAddress} colorScheme={element?.isVerified ? 'red' : 'green'} size='sm'
+                                                    onClick={async () => {
                                                         if (element?.identityAddress) {
-                                                            verifyUserClaim.mutate({
+                                                            await verifyUserClaim.mutateAsync({
                                                                 senderAddress: address?.toString(),
                                                                 userAddress: element?.userAddress,
                                                                 country: Number(inputCountry),
                                                                 verify: element?.isVerified ? false : true,
                                                             })
                                                             if (element?.isVerified) {
-                                                                useRemoveUser.mutate({ userAddress: element?.userAddress })
-                                                                registerIdentity.mutate({
+                                                                await useRemoveUser.mutateAsync({ userAddress: element?.userAddress })
+                                                                await deleteIdentity.mutateAsync({ userAddress: element?.userAddress })
+                                                            } else {
+                                                                await useAddUser.mutateAsync({ userAddress: element?.userAddress })
+                                                                await registerIdentity.mutateAsync({
                                                                     userAddress: element?.userAddress,
                                                                     identityAddress: element?.identityAddress,
-                                                                    country: BigInt(inputCountry),
+                                                                    country: Number(inputCountry),
                                                                 })
-                                                            } else {
-                                                                useAddUser.mutate({ userAddress: element?.userAddress })
-                                                                deleteIdentity.mutate({ userAddress: element?.userAddress })
                                                             }
                                                         }
                                                     }}>
