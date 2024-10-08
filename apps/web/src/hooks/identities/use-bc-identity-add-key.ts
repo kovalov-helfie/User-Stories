@@ -3,7 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { IDENTITY_ABI } from '../../abis/identity.abi'
 import { ID_FACTORY_ABI } from '../../abis/identity-factory.abi'
 import { IDENTITY_FACTORY } from '../../addresses'
-import { Address } from 'viem'
+import { Address, keccak256, pad } from 'viem'
+import { KeysTypes } from '../../types'
 
 export const useBcIdentityAddKey = () => {
     const queryClient = useQueryClient()
@@ -33,7 +34,7 @@ export const useBcIdentityAddKey = () => {
                     address: identityAddress as Address,
                     functionName: 'addKey',
                     args: [
-                        variables.senderAddress as Address,
+                        keccak256(pad(variables.senderAddress as Address)),
                         BigInt(KeysTypes.CLAIM),
                         BigInt(1)
                     ],
