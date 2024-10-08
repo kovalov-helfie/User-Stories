@@ -1,4 +1,4 @@
-import { useWriteContract } from 'wagmi'
+import { usePublicClient, useWriteContract } from 'wagmi'
 import { TOKEN_ABI } from '../../abis/token.abi'
 import { parseUnits, Address } from 'viem'
 import { TOKEN } from '../../addresses'
@@ -8,6 +8,7 @@ import { MINT_AMOUNT } from '../../constants'
 export const useBcMintAsset = () => {
     const queryClient = useQueryClient()
     const { writeContractAsync } = useWriteContract()
+    const publicClient = usePublicClient()
 
     const mutation = useMutation({
         mutationFn: async (
@@ -29,6 +30,7 @@ export const useBcMintAsset = () => {
                     true
                 ],
             })
+            await publicClient?.waitForTransactionReceipt({hash: wc})
           } catch (error) {
             console.error(error)
           }

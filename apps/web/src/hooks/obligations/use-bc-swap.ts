@@ -1,4 +1,4 @@
-import { useWriteContract } from 'wagmi'
+import { usePublicClient, useWriteContract } from 'wagmi'
 import { parseUnits, Address } from 'viem'
 import { UNI_TEST_TOKEN0, TOKEN, UNI_ROUTER } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -8,6 +8,7 @@ import { MAX_AMOUNT, MINT_AMOUNT } from '../../constants'
 export const useBcSwap = () => {
     const queryClient = useQueryClient()
     const { writeContractAsync } = useWriteContract()
+    const publicClient = usePublicClient()
 
     const mutation = useMutation({
         mutationFn: async (
@@ -31,6 +32,7 @@ export const useBcSwap = () => {
                     BigInt(0)
                 ],
             })
+            await publicClient?.waitForTransactionReceipt({hash: wc})
           } catch (error) {
             console.error(error)
           }

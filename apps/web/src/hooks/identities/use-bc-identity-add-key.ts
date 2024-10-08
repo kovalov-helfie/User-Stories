@@ -29,7 +29,7 @@ export const useBcIdentityAddKey = () => {
                     args: [variables.userAddress as Address],
                 })
 
-                const addKey = await writeContractAsync({
+                const wc = await writeContractAsync({
                     abi: IDENTITY_ABI,
                     address: identityAddress as Address,
                     functionName: 'addKey',
@@ -39,6 +39,7 @@ export const useBcIdentityAddKey = () => {
                         BigInt(1)
                     ],
                 })
+                await publicClient?.waitForTransactionReceipt({hash: wc})
             } catch (error) {
                 console.error(error)
             }

@@ -1,4 +1,4 @@
-import { useWriteContract } from 'wagmi'
+import { usePublicClient, useWriteContract } from 'wagmi'
 import { TIR_ABI } from '../../abis/tir.abi'
 import { TIR } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -7,6 +7,7 @@ import { Address } from 'viem'
 export const useAddOperator = () => {
     const queryClient = useQueryClient()
     const { writeContractAsync } = useWriteContract()
+    const publicClient = usePublicClient()
 
     const mutation = useMutation({
         mutationFn: async (
@@ -26,6 +27,7 @@ export const useAddOperator = () => {
                         variables.userAddress as Address,
                     ],
                 })
+                await publicClient?.waitForTransactionReceipt({hash: wc})
             } catch (error) {
                 console.error(error)
             }
