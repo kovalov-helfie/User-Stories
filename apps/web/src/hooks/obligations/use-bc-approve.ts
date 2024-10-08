@@ -1,6 +1,6 @@
 import { usePublicClient, useWriteContract } from 'wagmi'
 import { parseUnits, Address } from 'viem'
-import { UNI_TEST_TOKEN0 } from '../../addresses'
+import { UNI_ROUTER, UNI_TEST_TOKEN0 } from '../../addresses'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { TOKEN_ABI } from '../../abis/token.abi'
 import { MAX_AMOUNT } from '../../constants'
@@ -24,7 +24,7 @@ export const useBcApprove = () => {
                 address: UNI_TEST_TOKEN0,
                 functionName: 'approve',
                 args: [
-                    variables.userAddress as Address,
+                    UNI_ROUTER,
                     parseUnits(MAX_AMOUNT, 6),
                 ],
             })
