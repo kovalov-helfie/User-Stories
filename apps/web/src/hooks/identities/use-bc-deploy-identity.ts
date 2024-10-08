@@ -15,21 +15,35 @@ export const useDeployIdentity = () => {
                 userAddress: string | undefined,
                 senderAddress: string | undefined,
                     }) => {
-            if (!variables.userAddress) {
+            if (!variables.userAddress || !variables.senderAddress) {
                 throw new Error("No User")
             }
 
             try {
-                const wc = await writeContractAsync({
-                    abi: ID_FACTORY_ABI,
-                    address: IDENTITY_FACTORY,
-                    functionName: 'createIdentityWithManagementKeys',
-                    args: [
-                        variables.userAddress as Address,
-                        variables.userAddress as Address,
-                        [keccak256(pad(variables.senderAddress as Hex))]
-                    ],
-                })
+                let wc;
+                if(variables.userAddress.toLowerCase() !== variables.senderAddress.toLowerCase()) {
+                    wc = await writeContractAsync({
+                        abi: ID_FACTORY_ABI,
+                        address: IDENTITY_FACTORY,
+                        functionName: 'createIdentityWithManagementKeys',
+                        args: [
+                            variables.userAddress as Address,
+                            variables.userAddress as Address,
+                            [keccak256(pad(variables.senderAddress as Hex))]
+                        ],
+                    })
+                } else {
+                    wc = await writeContractAsync({
+                        abi: ID_FACTORY_ABI,
+                        address: IDENTITY_FACTORY,
+                        functionName: 'createIdentity',
+                        args: [
+                            variables.userAddress as Address,
+                            variables.userAddress as Address
+                        ],
+                    })
+                } 
+                
                 await publicClient?.waitForTransactionReceipt({hash: wc})
             } catch (error) {
                 console.error(error)
