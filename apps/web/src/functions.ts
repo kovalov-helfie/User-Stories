@@ -20,14 +20,14 @@ export const claimSignature = (
 };
 
 export const generateClaimId = (
-    identityHolder: Address,
+    identityIssuer: Address,
     claimTopic: bigint,
 ): string => {
     const claimid =
         keccak256(
             encodeAbiParameters(
                 parseAbiParameters('address, uint256'),
-                [identityHolder, claimTopic],
+                [identityIssuer, claimTopic],
             ),
         );
     return claimid;

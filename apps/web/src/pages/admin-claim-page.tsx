@@ -14,7 +14,7 @@ export const AdminClaimPage = () => {
     const { isLoadingUser, userData } = useGetUser(address?.toString())
     const { isPendingClaims, claimsData } = useGetClaims('true')
 
-    const mutation = useVerifyUserClaim()
+    const verifyClaim = useVerifyUserClaim()
     const addClaim = useBcCreateClaim()
     const removeClaim = useBcRemoveClaim()
 
@@ -56,28 +56,28 @@ export const AdminClaimPage = () => {
                                                 !element?.user.isVerified
                                                     ?
                                                     <Button colorScheme={!element?.isClaimVerified ? "green" : "red"} size='sm'
-                                                        isDisabled={element?.user.isVerified || element?.user?.identityAddress === null} onClick={() => {
+                                                        isDisabled={element?.user.isVerified || element?.user?.identityAddress === null} onClick={async () => {
                                                             if (!element?.user.isVerified && element?.user?.identityAddress !== null) {
-                                                                mutation.mutate({
-                                                                    senderAddress: address?.toString(),
-                                                                    userAddress: element?.userAddress,
-                                                                    claimTopic: Number(element?.claimTopic),
-                                                                    verify: !element?.isClaimVerified
-                                                                })
                                                                 if (!element?.isClaimVerified) {
-                                                                    addClaim.mutate({
+                                                                    await addClaim.mutateAsync({
                                                                         senderAddress: address?.toString(),
                                                                         userAddress: element?.userAddress,
                                                                         identityAddress: element?.user?.identityAddress,
                                                                         claimTopic: BigInt(element?.claimTopic)
                                                                     })
                                                                 } else {
-                                                                    removeClaim.mutate({
+                                                                    await removeClaim.mutateAsync({
                                                                         userAddress: address?.toString(),
                                                                         identityAddress: element?.user?.identityAddress,
                                                                         claimTopic: BigInt(element?.claimTopic)
                                                                     })
                                                                 }
+                                                                await verifyClaim.mutateAsync({
+                                                                    senderAddress: address?.toString(),
+                                                                    userAddress: element?.userAddress,
+                                                                    claimTopic: Number(element?.claimTopic),
+                                                                    verify: !element?.isClaimVerified
+                                                                })
                                                             }
                                                         }}>
                                                         {!element?.isClaimVerified ? "Verify" : "Unverify"}
