@@ -1,15 +1,16 @@
-import { Button, Checkbox, Input, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex, Select } from "@chakra-ui/react"
-import { env } from "../env"
+import { Button, Checkbox, Input, Stack, Table, TableCaption, TableContainer, Tbody, Td, Th, Thead, Tr, Container, Flex, Select } from "@chakra-ui/react"
 import { useAccount } from "wagmi"
 import { useGetUser } from "../hooks/users/use-get-user"
 import { useGetUserClaims } from "../hooks/claims/use-get-user-claims"
 import { UserComponent } from "../components/user-component"
 import { useCreateUserClaim } from "../hooks/claims/use-create-user-claim"
-import { useReducer, useState } from "react"
+import { useState } from "react"
 import { HeaderComponent } from "../components/header-component"
 import { HeaderImage } from "../components/image-component"
 import { useEditUserClaim } from "../hooks/claims/use-edit-user-claim"
 import { useGetClaimTopics } from "../hooks/claims/use-bc-get-claim-topics"
+import { zeroAddress } from "viem"
+import { EditDocComponent } from "../components/edit-doc-component"
 
 export const HomePage = () => {
     const { address } = useAccount()
@@ -54,23 +55,10 @@ export const HomePage = () => {
                                 </Td>
                                 <Td w={'25%'}>
                                     {
-                                        !element?.isClaimVerified && <Flex w={'100%'} justifyContent={'center'}>
-                                            <Stack spacing={3} w={'100%'} direction={'row'} maxW={'2xl'}>
-                                                <Input placeholder='Document' type="file" w={'50%'} onChange={(e) => { if (e.target.files) { setInputEditDoc(e.target.files[0]); } }} />
-                                                <Button colorScheme='yellow' size={'m'} w={'50%'} onClick={() => {
-                                                    editMutation.mutate({
-                                                        userAddress: address?.toString(),
-                                                        claimTopic: element?.claimTopic,
-                                                        docgen: inputEditDoc,
-                                                    })
-                                                    setInputEditDoc(null)
-                                                }}>
-                                                    Edit Claim Topic
-                                                </Button>
-                                            </Stack>
-                                        </Flex>
+                                        !element?.isClaimVerified && 
+                                            <EditDocComponent address={address?.toString() ?? zeroAddress}
+                                                claimTopic={element?.claimTopic ?? 0}/>
                                     }
-
                                 </Td>
                             </Tr>
                         )
