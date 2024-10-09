@@ -3,8 +3,10 @@
   "version": "0.0.1",
   "license": "MIT",
   "scripts": {
+    "build:web": "nx build web",
     "serve:web": "nx serve web",
     "lint:web": "nx lint web --verbose",
+    "build:api": "nx build api",
     "serve:api": "nx serve api",
     "lint:api": "nx lint api --verbose"
   },
