@@ -1,0 +1,47 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      target: development
+    command: node ./dist/apps/api/main.js
+    env_file:
+      - ./apps/api/.env
+    depends_on:
+      - postgres
+    volumes:
+      - .api:/data
+    networks:
+      - monorepo
+    ports:
+      - '3000:3000'
+
+  postgres:
+    image: postgres:15
+    ports:
+      - ${DB_PORT:-5432}:${DB_PORT:-5432}
+    command: [postgres, -cshared_preload_libraries=pg_stat_statements]
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-admin}
+      POSTGRES_DB: ${DB_NAME:-test}
+      POSTGRES_PORT: ${DB_PORT:-5432}:${DB_PORT:-5432}
+    restart: on-failure:3
+    volumes:
+      - postgres:/var/lib/data
+    networks:
+      - monorepo
+    healthcheck:
+      test: pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-test}
+      start_period: 5s
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+networks:
+  monorepo:
+    driver: bridge  
+
+volumes:
+  api:
+  postgres:
