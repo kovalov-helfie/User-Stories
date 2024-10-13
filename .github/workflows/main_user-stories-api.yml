@@ -24,7 +24,7 @@ jobs:
       - name: npm install, build
         run: |
           yarn install
-          yarn run build
+          yarn run build:api
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
