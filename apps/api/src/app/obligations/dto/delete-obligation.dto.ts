@@ -6,9 +6,10 @@ export class DeleteObligationDto {
     @IsEthereumAddress()
     @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
     userAddress: string;
-    @IsNumber()
-    @ApiProperty({type: Number, example: 0})
-    assetId: number;
+    @IsString()
+    @IsEthereumAddress()
+    @ApiProperty({type: String, example: "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f"})
+    tokenAddress: string;
     @IsNumber()
     @ApiProperty({type: Number, example: 0})
     obligationId: number;

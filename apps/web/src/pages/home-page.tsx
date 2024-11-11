@@ -1,14 +1,13 @@
 import { Button, Checkbox, Input, Stack, Table, TableCaption, TableContainer, Tbody, Td, Th, Thead, Tr, Container, Flex, Select } from "@chakra-ui/react"
 import { useAccount } from "wagmi"
-import { useGetUser } from "../hooks/users/use-get-user"
-import { useGetUserClaims } from "../hooks/claims/use-get-user-claims"
+import { useGetUser } from "../hooks/api/users/use-get-user"
+import { useGetUserClaims } from "../hooks/api/claims/use-get-user-claims"
 import { UserComponent } from "../components/user-component"
-import { useCreateUserClaim } from "../hooks/claims/use-create-user-claim"
+import { useCreateUserClaim } from "../hooks/api/claims/use-create-user-claim"
 import { useState } from "react"
 import { HeaderComponent } from "../components/header-component"
 import { HeaderImage } from "../components/image-component"
-import { useEditUserClaim } from "../hooks/claims/use-edit-user-claim"
-import { useGetClaimTopics } from "../hooks/claims/use-bc-get-claim-topics"
+import { useBcGetClaimTopics } from "../hooks/blockchain/claims/use-bc-get-claim-topics"
 import { zeroAddress } from "viem"
 import { EditDocComponent } from "../components/edit-doc-component"
 
@@ -16,14 +15,12 @@ export const HomePage = () => {
     const { address } = useAccount()
     const { isLoadingUser, userData } = useGetUser(address?.toString())
     const { isPendingUserClaims, userClaimsData } = useGetUserClaims(address?.toString())
-    const { claimTopicsData } = useGetClaimTopics()
+    const { claimTopicsData } = useBcGetClaimTopics()
 
     const [inputClaimTopic, setClaimTopic] = useState('');
     const [inputDoc, setInputDoc] = useState<File | null>(null);
-    const [inputEditDoc, setInputEditDoc] = useState<File | null>(null);
 
     const mutation = useCreateUserClaim()
-    const editMutation = useEditUserClaim()
 
     return <Container maxW={'8xl'} w={'100%'}>
         <HeaderComponent userData={userData} />
@@ -56,8 +53,11 @@ export const HomePage = () => {
                                 <Td w={'25%'}>
                                     {
                                         !element?.isClaimVerified && 
-                                            <EditDocComponent address={address?.toString() ?? zeroAddress}
-                                                claimTopic={element?.claimTopic ?? 0}/>
+                                            <EditDocComponent 
+                                                senderAddress={address?.toString() ?? zeroAddress}
+                                                address={address?.toString() ?? zeroAddress}
+                                                claimTopic={element?.claimTopic ?? 0}
+                                                isToken={false}/>
                                     }
                                 </Td>
                             </Tr>
@@ -77,8 +77,8 @@ export const HomePage = () => {
                     {
                         claimTopicsData.map((element: any) => {
                             return (
-                                <option value={element}>
-                                    {element}
+                                <option value={element.value.toString()}>
+                                    {element.name}
                                 </option>
                             )
                         })

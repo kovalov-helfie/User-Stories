@@ -326,6 +326,11 @@ export const IR_ABI = [
                 "internalType": "address",
                 "name": "_userAddress",
                 "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "isToken",
+                "type": "bool"
             }
         ],
         "name": "isVerified",

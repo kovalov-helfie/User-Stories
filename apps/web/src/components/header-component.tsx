@@ -12,7 +12,8 @@ export function HeaderComponent({userData}: {userData: any}) {
                 ?
                     <>
                         <NavLink to={'/admin-user'}>Admin User</NavLink>
-                        <NavLink to={'/admin-claim'}>Admin Claim</NavLink>
+                        <NavLink to={'/admin-asset'}>Admin Asset</NavLink>
+                        <NavLink to={'/admin-token-compliance'}>Admin Token Compliance</NavLink>
                     </>
                 :
                     <></>

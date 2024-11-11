@@ -1,9 +1,9 @@
 import { Button } from "@chakra-ui/react"
 import { useAppKit } from "@reown/appkit/react"
 import { useAccount } from "wagmi"
-import { useCreateUser } from "../hooks/users/use-create-user"
+import { useCreateUser } from "../hooks/api/users/use-create-user"
 import { useEffect } from "react"
-import { useGetUser } from "../hooks/users/use-get-user"
+import { useGetUser } from "../hooks/api/users/use-get-user"
 
 export const Web3Button = () => {
     const { address } = useAccount()

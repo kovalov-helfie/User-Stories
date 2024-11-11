@@ -198,6 +198,19 @@ export const TIR_ABI = [
   },
   {
     "inputs": [],
+    "name": "MAX_LINKED_WALLETS",
+    "outputs": [
+      {
+        "internalType": "uint8",
+        "name": "",
+        "type": "uint8"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "MAX_MODULE_COMPLIANCE",
     "outputs": [
       {

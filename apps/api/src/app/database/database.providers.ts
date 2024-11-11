@@ -5,6 +5,11 @@ import { Identity } from '../identities/identity.entity';
 import { Asset } from '../assets/asset.entity';
 import { Obligation } from '../obligations/obligation.entity';
 import { env } from '../../env';
+import { TokenClaim } from '../token-claims/token-claim.entity';
+import { TokenIdentity } from '../token-identities/token-identity.entity';
+import { TokenComplianceRequest } from '../token-compliance/token-compliance-request.entity';
+import { DvdTransfer } from '../dvd-transfers/dvd-transfer.entity';
+import { UserAsset } from '../user-assets/user-asset.entity';
 
 export const databaseProviders = [
   {
@@ -18,7 +23,18 @@ export const databaseProviders = [
         password: env.DB_PASSWORD,
         database: env.DB_NAME,
       });
-      sequelize.addModels([User,Claim,Identity,Asset,Obligation]);
+      sequelize.addModels([
+        User,
+        Claim,
+        Identity,
+        Asset,
+        UserAsset,
+        Obligation,
+        TokenClaim, 
+        TokenIdentity, 
+        TokenComplianceRequest, 
+        DvdTransfer,
+      ]);
       await sequelize.sync();
       return sequelize;
     },

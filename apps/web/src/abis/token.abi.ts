@@ -76,6 +76,11 @@ export const TOKEN_ABI = [
     },
     {
         "inputs": [],
+        "name": "NotVerifiedToken",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "RecoveryNotPossible",
         "type": "error"
     },

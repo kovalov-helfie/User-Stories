@@ -70,13 +70,13 @@ export class UserController {
         }
         if(dto.verify) {
             if(await this.apiService.isUserVerified({userAddress: dto.userAddress})) {
-                throw new BadRequestException(`User [${dto.senderAddress}] is already verified`)
+                throw new BadRequestException(`User [${dto.userAddress}] is already verified`)
             } else if(!(await this.apiService.areAllClaimsVerified({userAddress: dto.userAddress}))) {
-                throw new BadRequestException(`User [${dto.senderAddress}] claims are not verified`)
+                throw new BadRequestException(`User [${dto.userAddress}] claims are not verified`)
             }
         } else {
             if(!(await this.apiService.isUserVerified({userAddress: dto.userAddress}))) {
-                throw new BadRequestException(`User [${dto.senderAddress}] is not verified`)
+                throw new BadRequestException(`User [${dto.userAddress}] is not verified`)
             }
         }
 

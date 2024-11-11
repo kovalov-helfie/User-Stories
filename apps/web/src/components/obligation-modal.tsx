@@ -1,9 +1,9 @@
 import { Modal, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay } from "@chakra-ui/react"
-import { useGetObligationByAsset } from "../hooks/obligations/use-get-obligation";
+import { useGetObligationByAssetAndSeller } from "../hooks/api/obligations/use-get-obligation";
 import { CreateObligationBody } from "./create-obligation-body";
 
-export const ObligationModal = ({ isOpen, onClose, assetId, userAddress }: { isOpen: boolean, onClose: () => void, assetId: number, userAddress: string }) => {
-  const { isLoadingObligationByAsset, obligationByAssetData } = useGetObligationByAsset(assetId)
+export const ObligationModal = ({ isOpen, onClose, tokenAddress, userAddress }: { isOpen: boolean, onClose: () => void, tokenAddress: string, userAddress: string }) => {
+  const { isLoadingObligationByAsset, obligationByAssetData } = useGetObligationByAssetAndSeller(tokenAddress, userAddress)
 
   return <>
     <Modal isOpen={isOpen} onClose={onClose} >
@@ -13,7 +13,7 @@ export const ObligationModal = ({ isOpen, onClose, assetId, userAddress }: { isO
         <ModalCloseButton />
         {
           !isLoadingObligationByAsset 
-            && <CreateObligationBody assetId={assetId} userAddress={userAddress} modalBody={obligationByAssetData}></CreateObligationBody>
+            && <CreateObligationBody tokenAddress={tokenAddress} userAddress={userAddress} modalBody={obligationByAssetData}/>
         }
       </ModalContent>
     </Modal>

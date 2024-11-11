@@ -1,51 +1,36 @@
 import { Button, Stack, Input, ModalBody, FormControl, FormLabel } from "@chakra-ui/react"
 import { useState } from "react";
-import { useCreateObligation } from "../hooks/obligations/use-create-obligation";
-import { isAddress } from 'viem'
+import { useCreateObligation } from "../hooks/api/obligations/use-create-obligation";
 
-export const CreateObligationBody = ({ assetId, userAddress, modalBody }: { assetId:number, userAddress: string, modalBody: any }) => {
-  const [inputMinAmount, setInputMinAmount] = useState(modalBody?.minPurchaseAmount ?? 0);
-  const [inputLockup, setInputLockup] = useState(modalBody?.lockupPeriod ?? 0);
-  const [inputRestrict, setInputRestrict] = useState(modalBody?.transferRestrictionAddress ?? '');
+export const CreateObligationBody = ({ tokenAddress, userAddress, modalBody }: { tokenAddress: string, userAddress: string, modalBody: any }) => {
+  const [inputAmount, setInputAmount] = useState(modalBody?.amount ?? 0);
+  const [inputTxCount, setInputLockup] = useState(modalBody?.txCount ?? 0);
 
   const createObligationMutation = useCreateObligation()
 
   return <>
-        <ModalBody>
-          <Stack spacing={3} w={'100%'}>
-            <FormControl>
-              <FormLabel>Min purchase Amount</FormLabel>
-              <Input placeholder='Min purchase Amount' value={inputMinAmount} onChange={(e) => setInputMinAmount(Number(e.target.value))} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Lock up time in secs</FormLabel>
-              <Input placeholder='Lock up time in secs' value={inputLockup} onChange={(e) => setInputLockup(Number(e.target.value))} />
-            </FormControl>
-            <FormControl>
-              <FormLabel>Transfer restriction address</FormLabel>
-              <Input placeholder='Transfer restriction address' value={inputRestrict} onChange={(e) => {
-                if (e.target.value !== '') {
-                  if (isAddress(e.target.value)) {
-                    setInputRestrict(e.target.value)
-                  }
-                }
-                setInputRestrict(e.target.value)
-              }} />
-            </FormControl>
-            <Button colorScheme='blue' onClick={() => {
-              createObligationMutation.mutate({
-                assetId: assetId,
-                userAddress: userAddress,
-                minPurchaseAmount: inputMinAmount,
-                lockupPeriod: inputLockup,
-                transferRestrictionAddress: inputRestrict,
-                obligationId: !modalBody?.id ? null : modalBody?.id 
-              })
-            }}>
-              { !modalBody ? 'Create ' : 'Edit '}
-              Obligation for Asset[{assetId}]
-            </Button>
-          </Stack>
-        </ModalBody>
+    <ModalBody>
+      <Stack spacing={3} w={'100%'}>
+        <FormControl>
+          <FormLabel>Amount</FormLabel>
+          <Input placeholder='Amount' value={inputAmount} onChange={(e) => setInputAmount(Number(e.target.value))} />
+        </FormControl>
+        <FormControl>
+          <FormLabel>Tx Count</FormLabel>
+          <Input placeholder='Tx Count' value={inputTxCount} onChange={(e) => setInputLockup(Number(e.target.value))} />
+        </FormControl>
+        <Button colorScheme='blue' onClick={() => {
+          createObligationMutation.mutate({
+            tokenAddress: tokenAddress,
+            userAddress: userAddress,
+            amount: inputAmount,
+            txCount: inputTxCount,
+            obligationId: !modalBody?.obligationId ? null : modalBody?.obligationId 
+          })
+        }}>
+          {!modalBody?.obligationId ? 'Create' : 'Edit'} for Asset[{tokenAddress.slice(0, 7)}]
+        </Button>
+      </Stack>
+    </ModalBody>
   </>
 }

@@ -117,6 +117,32 @@ export const CTR_ABI = [
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "claimTopic",
+                "type": "uint256"
+            }
+        ],
+        "name": "TokenClaimTopicAdded",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "uint256",
+                "name": "claimTopic",
+                "type": "uint256"
+            }
+        ],
+        "name": "TokenClaimTopicRemoved",
+        "type": "event"
+    },
+    {
         "inputs": [],
         "name": "CTR_VERSION",
         "outputs": [
@@ -163,6 +189,19 @@ export const CTR_ABI = [
                 "internalType": "uint16",
                 "name": "",
                 "type": "uint16"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "MAX_LINKED_WALLETS",
+        "outputs": [
+            {
+                "internalType": "uint8",
+                "name": "",
+                "type": "uint8"
             }
         ],
         "stateMutability": "view",
@@ -221,8 +260,34 @@ export const CTR_ABI = [
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_claimTopic",
+                "type": "uint256"
+            }
+        ],
+        "name": "addTokenClaimTopic",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "getClaimTopics",
+        "outputs": [
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getTokenClaimTopics",
         "outputs": [
             {
                 "internalType": "uint256[]",
@@ -268,6 +333,19 @@ export const CTR_ABI = [
             }
         ],
         "name": "removeClaimTopic",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_claimTopic",
+                "type": "uint256"
+            }
+        ],
+        "name": "removeTokenClaimTopic",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"

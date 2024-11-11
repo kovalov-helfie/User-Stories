@@ -1,16 +1,19 @@
 import { Button, Input, Stack } from "@chakra-ui/react";
 import { useState } from "react";
-import { useDeleteIdentity } from "../hooks/identities/use-bc-delete-identity";
-import { useRegisterIdentity } from "../hooks/identities/use-bc-register-identity";
-import { useAddOperator } from "../hooks/users/use-bc-add-operator";
-import { useRemoveOperator } from "../hooks/users/use-bc-remove-operator";
-import { useVerifyUser } from "../hooks/users/use-verify-user";
+import { useDeleteIdentity } from "../hooks/blockchain/identities/use-bc-delete-identity";
+import { useRegisterIdentity } from "../hooks/blockchain/identities/use-bc-register-identity";
+import { useAddOperator } from "../hooks/blockchain/users/use-bc-add-operator";
+import { useRemoveOperator } from "../hooks/blockchain/users/use-bc-remove-operator";
+import { useVerifyUser } from "../hooks/api/users/use-verify-user";
+import { useAllUserClaimsVerified } from "../hooks/api/claims/use-get-all-user-claims-verified";
 
 export function VerifyUser({ country, isVerified, identityAddress, address, userAddress }:
     { country: string, isVerified: boolean, identityAddress: string, address: string, userAddress: string }) {
     const [inputCountry, setInputCountry] = useState(country);
 
-    const verifyUserClaim = useVerifyUser()
+    const { isPendingVer, allUserClaimsVerified } = useAllUserClaimsVerified(userAddress);
+
+    const verifyUser = useVerifyUser()
 
     const useAddUser = useAddOperator()
     const registerIdentity = useRegisterIdentity()
@@ -21,25 +24,25 @@ export function VerifyUser({ country, isVerified, identityAddress, address, user
     return (
         <Stack direction={"column"}>
             {
-                !country || !isVerified
+                !isVerified
                     ? <Input placeholder='Country' value={inputCountry} onChange={(e) => setInputCountry(e.target.value)} />
                     : <></>
             }
-            <Button isDisabled={!identityAddress} colorScheme={isVerified ? 'red' : 'green'} size='sm'
+            <Button isDisabled={!identityAddress || !allUserClaimsVerified} colorScheme={isVerified ? 'red' : 'green'} size='sm'
                 onClick={async () => {
-                    if (identityAddress) {
+                    if (identityAddress && allUserClaimsVerified) {
                         if (isVerified) {
-                            await deleteIdentity.mutateAsync({ userAddress: userAddress })
+                            await deleteIdentity.mutateAsync({ address: userAddress })
                             await useRemoveUser.mutateAsync({ userAddress: userAddress })
                         } else {
                             await registerIdentity.mutateAsync({
-                                userAddress: userAddress,
+                                address: userAddress,
                                 identityAddress: identityAddress,
                                 country: Number(inputCountry),
                             })
                             await useAddUser.mutateAsync({ userAddress: userAddress })
                         }
-                        await verifyUserClaim.mutateAsync({
+                        await verifyUser.mutateAsync({
                             senderAddress: address?.toString(),
                             userAddress: userAddress,
                             country: Number(inputCountry),

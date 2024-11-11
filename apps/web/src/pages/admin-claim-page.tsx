@@ -1,18 +1,22 @@
 import { Button, Checkbox, Text, Stack, Table, Image, TableCaption, TableContainer, Tbody, Td, Tfoot, Th, Thead, Tr, Container, Flex, Link, Input, TagLabel, FormControl, FormLabel } from "@chakra-ui/react"
 import { UserComponent } from "../components/user-component"
-import { useGetUser } from "../hooks/users/use-get-user"
+import { useGetUser } from "../hooks/api/users/use-get-user"
 import { useAccount } from "wagmi"
-import { useGetClaims } from "../hooks/claims/use-get-claims"
+import { useGetClaims } from "../hooks/api/claims/use-get-claims"
 import { env } from "../env"
-import { useVerifyUserClaim } from "../hooks/claims/use-verify-user-claim"
+import { useVerifyUserClaim } from "../hooks/api/claims//use-verify-user-claim"
 import { HeaderComponent } from "../components/header-component"
-import { useBcCreateClaim } from "../hooks/claims/use-bc-create-claim-topics"
-import { useBcRemoveClaim } from "../hooks/claims/use-bc-remove-claim-topics"
+import { useBcCreateClaim } from "../hooks/blockchain/claims/use-bc-create-claim-topics"
+import { useBcRemoveClaim } from "../hooks/blockchain/claims/use-bc-remove-claim-topics"
+import { getClaimTopicName } from "../functions"
+import { useParams } from "react-router-dom"
+import { useGetUserClaims } from "../hooks/api/claims/use-get-user-claims"
 
 export const AdminClaimPage = () => {
     const { address } = useAccount()
+    const { userAddress } = useParams()
     const { isLoadingUser, userData } = useGetUser(address?.toString())
-    const { isPendingClaims, claimsData } = useGetClaims('true')
+    const { isPendingUserClaims, userClaimsData } = useGetUserClaims(userAddress)
 
     const verifyClaim = useVerifyUserClaim()
     const addClaim = useBcCreateClaim()
@@ -36,7 +40,7 @@ export const AdminClaimPage = () => {
                             </Tr>
                         </Thead>
                         <Tbody>
-                            {claimsData?.map((element: any) => {
+                            {userClaimsData?.map((element: any) => {
                                 return (
                                     <Tr key={`${element?.claimUserKey}`}>
                                         <Td>
@@ -46,7 +50,7 @@ export const AdminClaimPage = () => {
                                             </Stack>
                                         </Td>
                                         <Td>
-                                            <Text>{element?.claimTopic}</Text >
+                                            <Text>{getClaimTopicName(BigInt(element?.claimTopic))}</Text >
                                         </Td>
                                         <Td>
                                             <Image src={`${env.VITE_API_URL}/claims/claim/docgen/${address?.toString()}/${element?.userAddress}-${element?.claimTopic}`} alt='Doc' boxSize='75px' />
@@ -61,13 +65,14 @@ export const AdminClaimPage = () => {
                                                                 if (!element?.isClaimVerified) {
                                                                     await addClaim.mutateAsync({
                                                                         senderAddress: address?.toString(),
-                                                                        userAddress: element?.userAddress,
+                                                                        address: element?.userAddress,
                                                                         identityAddress: element?.user?.identityAddress,
-                                                                        claimTopic: BigInt(element?.claimTopic)
+                                                                        claimTopic: BigInt(element?.claimTopic),
+                                                                        data: element?.data,
                                                                     })
                                                                 } else {
                                                                     await removeClaim.mutateAsync({
-                                                                        userAddress: address?.toString(),
+                                                                        address: address?.toString(),
                                                                         identityAddress: element?.user?.identityAddress,
                                                                         claimTopic: BigInt(element?.claimTopic)
                                                                     })

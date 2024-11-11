@@ -36,6 +36,14 @@ export class ClaimController {
         return await this.apiService.findAllClaimsByUser({userAddress: userAddress});
     }
 
+    @Get('all-verified/:userAddress')
+    @ApiResponse({status: 200, description: 'user claims', type: Boolean})
+    @ApiOperation({summary: "retrieve all user claims"})
+    @ApiParam({name: 'userAddress', required: true, description: 'eth user address', type: String, example: '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f'})
+    async getAllUserClaimsVerified(@Param('userAddress') userAddress: string) {
+        return await this.apiService.areAllClaimsVerified({userAddress: userAddress});
+    }
+
     @Get('/claim/:userAddress-:claimTopic')
     @ApiResponse({status: 200, description: 'claim by claimUserKey', type: Claim})
     @ApiOperation({summary: "retrieve claim by claimUserKey"})
@@ -58,8 +66,7 @@ export class ClaimController {
         }
         return await this.apiService.createClaim({
             userAddress: dto.userAddress, 
-            claimTopic: dto.claimTopic, 
-            docGen: ''
+            claimTopic: dto.claimTopic,
         });
     }
 
@@ -106,11 +113,12 @@ export class ClaimController {
         } else if((await this.apiService.isClaimVerified({userAddress: userAddress, claimTopic: Number(claimTopic)}))) {
             throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] is already verified`)
         }
-        const fileName = await this.fileService.saveFile(file, `${userAddress}-${claimTopic}`)
+        const keccakFile = await this.fileService.saveFile(file, `${userAddress}-${claimTopic}`)
         return await this.apiService.updateDocgen({
             userAddress: userAddress, 
             claimTopic: Number(claimTopic), 
-            docGen: fileName
+            docGen: keccakFile.filename,
+            data: keccakFile.data,
         });
     }
 
@@ -132,7 +140,7 @@ export class ClaimController {
             throw new BadRequestException(`Claim [${userAddress}-${claimTopic}] does not exist`)
         } else if(!(await this.apiService.isUserAdmin({ userAddress: senderAddress }))) {
             if (!(await this.signatureService.verifySignature('getDocgen', signature, senderAddress))) {
-                throw new UnauthorizedException(`User [${userAddress}] not authorized`)
+                throw new UnauthorizedException(`User [${senderAddress}] not authorized`)
             }
         }
         const docgen = await this.apiService.getClaimDocgen({ userAddress: userAddress, claimTopic: Number(claimTopic) })

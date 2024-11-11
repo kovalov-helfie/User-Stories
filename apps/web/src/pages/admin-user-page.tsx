@@ -1,14 +1,15 @@
 import { Button, Checkbox, Text, Stack, Table, TableCaption, TableContainer, Tbody, Td, Th, Thead, Tr, Container } from "@chakra-ui/react"
 import { UserComponent } from "../components/user-component"
-import { useGetUser } from "../hooks/users/use-get-user"
+import { useGetUser } from "../hooks/api/users/use-get-user"
 import { useAccount } from "wagmi"
-import { useGetUsers } from "../hooks/users/use-get-users"
+import { useGetUsers } from "../hooks/api/users/use-get-users"
 import { HeaderComponent } from "../components/header-component"
-import { useCreateIdentity } from "../hooks/identities/use-create-identity"
-import { useDeployIdentity } from "../hooks/identities/use-bc-deploy-identity"
-import { useBcIdentityAddKey } from "../hooks/identities/use-bc-identity-add-key"
+import { useCreateIdentity } from "../hooks/api/identities/use-create-identity"
+import { useDeployIdentity } from "../hooks/blockchain/identities/use-bc-deploy-identity"
+import { useBcIdentityAddKey } from "../hooks/blockchain/identities/use-bc-identity-add-key"
 import { VerifyUser } from "../components/verify-user"
 import { zeroAddress } from "viem"
+import { useNavigate } from "react-router-dom"
 
 export const AdminUserPage = () => {
     const { address } = useAccount()
@@ -16,8 +17,10 @@ export const AdminUserPage = () => {
     const { isPendingUsers, usersData } = useGetUsers()
 
     const deployIdentity = useDeployIdentity()
-    const addKey = useBcIdentityAddKey()
+    const addKey = useBcIdentityAddKey(true)
     const createIdentity = useCreateIdentity()
+
+    const navigate = useNavigate();
 
     return <Container maxW={'8xl'} w={'100%'}>
         <HeaderComponent userData={userData} />
@@ -32,8 +35,8 @@ export const AdminUserPage = () => {
                             <Th>User Address</Th>
                             <Th>Identity Address</Th>
                             <Th>Country</Th>
+                            <Th>Claims</Th>
                             <Th>Verified</Th>
-                            <Th>Admin</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
@@ -52,11 +55,11 @@ export const AdminUserPage = () => {
                                             <Button colorScheme='blue' size='sm' onClick={async () => {
                                                 if (!element?.identityAddress) {
                                                     await deployIdentity.mutateAsync({
-                                                        userAddress: element?.userAddress,
+                                                        address: element?.userAddress,
                                                         senderAddress: address?.toString()
                                                     })
                                                     await addKey.mutateAsync({
-                                                        userAddress: element?.userAddress,
+                                                        address: element?.userAddress,
                                                         senderAddress: address?.toString()
                                                     })
                                                     await createIdentity.mutateAsync({
@@ -76,11 +79,21 @@ export const AdminUserPage = () => {
                                         </Stack>
                                     </Td>
                                     <Td>
+                                        <Button colorScheme='yellow' size='sm' isDisabled={!element?.identityAddress} onClick={() => {
+                                            if (element?.identityAddress) {
+                                                navigate(`/admin-claim/${element?.userAddress}`)
+                                            }
+                                        }
+                                        }>
+                                            Verify
+                                        </Button>
+                                    </Td>
+                                    <Td>
                                         <VerifyUser country={element?.country ?? '0'}
                                             isVerified={element?.isVerified ?? false}
                                             identityAddress={element?.identityAddress ?? zeroAddress}
                                             address={address?.toString() ?? zeroAddress}
-                                            userAddress={address?.toString() ?? zeroAddress} />
+                                            userAddress={element?.userAddress?.toString() ?? zeroAddress} />
                                     </Td>
                                     <Td><Checkbox size="lg" isChecked={element?.isAdmin} disabled /></Td>
                                 </Tr>
