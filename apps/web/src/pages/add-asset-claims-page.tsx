@@ -12,6 +12,7 @@ import { useGetUser } from "../hooks/api/users/use-get-user"
 import { useParams } from "react-router-dom"
 import { useBcGetTokenClaimTopics } from "../hooks/blockchain/claims/use-bc-get-token-claim-topics"
 import { TokenHeaderImage } from "../components/token-image-component"
+import { getTokenClaimTopicName } from "../functions"
 
 export const AddAssetClaimsPage = () => {
     const { address } = useAccount()
@@ -35,7 +36,7 @@ export const AddAssetClaimsPage = () => {
                 <Thead>
                     <Tr>
                         <Th>Token Address</Th>
-                        <Th isNumeric>Claim Topic</Th>
+                        <Th>Claim Topic</Th>
                         <Th>Document</Th>
                         <Th>Verified</Th>
                     </Tr>
@@ -45,7 +46,7 @@ export const AddAssetClaimsPage = () => {
                         return (
                             <Tr key={`${element?.claimTokenKey}`} justifyContent={'center'}>
                                 <Td>{element?.tokenAddress}</Td>
-                                <Td isNumeric>{element?.claimTopic}</Td>
+                                <Td>{getTokenClaimTopicName(BigInt(element?.claimTopic))}</Td>
                                 <Td w={'25%'} justifyContent={'center'} justifyItems={'center'}>
                                     <TokenHeaderImage claimTopic={element?.claimTopic} randomStr={element?.randomStr} />
                                 </Td>

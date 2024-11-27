@@ -10,6 +10,7 @@ import { HeaderImage } from "../components/image-component"
 import { useBcGetClaimTopics } from "../hooks/blockchain/claims/use-bc-get-claim-topics"
 import { zeroAddress } from "viem"
 import { EditDocComponent } from "../components/edit-doc-component"
+import { getClaimTopicName } from "../functions"
 
 export const HomePage = () => {
     const { address } = useAccount()
@@ -32,7 +33,7 @@ export const HomePage = () => {
                 <Thead>
                     <Tr>
                         <Th>User Address</Th>
-                        <Th isNumeric>Claim Topic</Th>
+                        <Th>Claim Topic</Th>
                         <Th>Document</Th>
                         <Th>Verified</Th>
                         <Th></Th>
@@ -43,7 +44,7 @@ export const HomePage = () => {
                         return (
                             <Tr key={`${element?.claimUserKey}`} justifyContent={'center'}>
                                 <Td>{element?.userAddress}</Td>
-                                <Td isNumeric>{element?.claimTopic}</Td>
+                                <Td>{getClaimTopicName(BigInt(element?.claimTopic))}</Td>
                                 <Td w={'25%'} justifyContent={'center'} justifyItems={'center'}>
                                     <HeaderImage claimTopic={element?.claimTopic} randomStr={element?.randomStr} />
                                 </Td>
